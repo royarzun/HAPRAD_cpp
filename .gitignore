@@ -1,0 +1,4 @@
+*.o
+*.exe
+res.dat
+test.dat
