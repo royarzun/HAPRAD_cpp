@@ -39,11 +39,13 @@ For radiative  correction calculation run::
     $ ./haprad20.exe
 
 Test-run reproduce relative exclusive radiative tail contribution at different
-phih to the observed cross section for the kinematical points of ref.
-
-    H. Avakian et al. [CLAS Collab.], Phys.Rev.D69:112004,2004.
+phih to the observed cross section for the kinematical points of ref [Avakian04]_.
 
 For test calculation run::
 
     $ make test
     $ ./test.exe
+
+.. [Avakian04] H. Avakian *et al.* (CLAS Collaboration), Measurement of
+               beam-spin asymmetries for pi plus electroproduction above the
+               baryon resonance region, *Phys. Rev. D 69* 112004 (2004).
