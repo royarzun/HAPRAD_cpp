@@ -26,7 +26,7 @@ FLIBS      := $(CERNLIBS)
 
 FCC  := gfortran
 
-F77OPT    := -march=i686 -DLinux -fno-automatic -ffixed-line-length-none \
+F77OPT    := -DLinux -fno-automatic -ffixed-line-length-none \
              -fdollar-ok -fno-second-underscore -Iinclude
 
 ##############################################################################
