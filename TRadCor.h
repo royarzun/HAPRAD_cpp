@@ -72,6 +72,11 @@ public:
     void SetEbeam(Double_t Ebeam);
     void SetMaxMx(Double_t maxMx2);
 
+    void RegisteredLepton(Int_t type = 1);
+    void IntegratePhiRad(Int_t type = 0);
+    void IntegratePhiHad(Int_t type = 0);
+    void SetPolarization(Int_t type = 0);
+
 private:
     void Setup(void);
     void Haprad(void);

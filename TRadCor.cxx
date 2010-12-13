@@ -117,6 +117,52 @@ void TRadCor::SetMaxMx(Double_t maxMx2)
 
 
 
+void TRadCor::RegisteredLepton(Int_t type)
+{
+    // Set the registere lepton: 1 -- electron; 2 -- muon.
+    //
+    // Default is 1.
+
+    _phi.ilep = type;
+}
+
+
+
+void TRadCor::IntegratePhiRad(Int_t type)
+{
+    // Set whether to integrate over phi_{rad} (1) or to approximate (0).
+    //
+    // Default is 0;
+
+    _tail.iphi_rad = type;
+}
+
+
+
+void TRadCor::IntegratePhiHad(Int_t type)
+{
+    // Set whether to integrate over phi_{had} (1) or not (0).
+    //
+    // Default is 0;
+
+    _tail.iphi_had = type;
+}
+
+
+
+void TRadCor::SetPolarization(Int_t type)
+{
+    // Set the type of the polarization:
+    //
+    //     1 -- long; 2 -- tran; 0 -- unpol.
+    //
+    // Default is 0;
+
+    _tail.ipol = type;
+}
+
+
+
 void TRadCor::Setup(void)
 {
     // Calculate the missing mass
