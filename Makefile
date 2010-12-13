@@ -54,8 +54,8 @@ LD        = g++
 LDFLAGS   = -O2 $(ROOTLDFLAGS)
 SOFLAGS   = -Wl,-soname,$(notdir $@) -shared
 
-INCLUDES  = -I.
-LIBS      =
+INCLUDES  := -I.
+LIBS      := $(ROOTLIBS)
 
 
 SLIB_DIR := slib
