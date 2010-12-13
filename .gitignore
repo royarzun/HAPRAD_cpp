@@ -2,3 +2,7 @@
 *.exe
 res.dat
 test.dat
+slib
+.obj
+.dict
+.dep
