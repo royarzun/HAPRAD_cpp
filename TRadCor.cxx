@@ -6,19 +6,20 @@
 TRadCor::TRadCor()
 : fEbeam(0),
   fX(0), fY(0), fZ(0), fPt(0), fPhi(0),
-  fMaxMx2(0), fMx2(0),
-  fSib(0), fSig(0), fDelta(0), fTail(0)
+  fMaxMx2(0), fMx2(0), fSib(0), fSig(0), fDelta(0), fTail(0),
+  _eps(), _phi(), _Sxy(), _tail()
 {
     // Default constructor
 }
+
 
 
 TRadCor::TRadCor(Double_t Ebeam, Double_t x, Double_t q2, Double_t z,
                  Double_t pt, Double_t phi, Double_t maxMx2)
 : fEbeam(Ebeam),
   fX(x), fY(-q2), fZ(z), fPt(pt), fPhi(phi/kRadianDeg),
-  fMaxMx2(maxMx2), fMx2(0),
-  fSib(0), fSig(0), fDelta(0), fTail(0)
+  fMaxMx2(0), fMx2(0), fSib(0), fSig(0), fDelta(0), fTail(0),
+  _eps(), _phi(), _Sxy(), _tail()
 {
     // Normal constructor for a radiative correction object
     //
