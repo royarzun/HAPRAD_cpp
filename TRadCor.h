@@ -27,7 +27,9 @@ public:
 
 private:
     void Setup(void);
+    void Haprad(void);
 
+    Double_t fRCFac;
     Double_t fEbeam;        // The beam energy
     Double_t fX;
     Double_t fY;

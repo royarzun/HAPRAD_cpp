@@ -136,7 +136,9 @@ Double_t TRadCor::GetRCFactor(void)
     // Get the radiative correction factor. You must set the parameters before
     // using this method.
 
-    return 0.;
+    Haprad();
+    fRCFac = fSig / fSib;
+    return fRCFac;
 }
 
 
@@ -153,4 +155,11 @@ Double_t TRadCor::GetRCFactor(Double_t Ebeam, Double_t x, Double_t q2, Double_t 
 
     SetParameters(Ebeam,x,q2,z,pt,phi,maxMx2);
     return GetRCFactor();
+}
+
+
+
+void TRadCor::Haprad(void)
+{
+
 }
