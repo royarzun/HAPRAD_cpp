@@ -2,6 +2,7 @@
 
 const Double_t kBarn = 0.389379 * TMath::Power(10,6);
 const Double_t kAlpha = 0.729735 * TMath::Power(10,-2);
+const Double_t kPi = TMath::Pi();
 
 const Double_t kMassProton = 0.938272;
 const Double_t kMassNeutron = 0.93956536;

@@ -91,6 +91,10 @@ private:
     void Haprad(void);
     void Conkin(const Double_t snuc);
     void SPhiH();
+    void Deltas(void);
+    void Bornin(void);
+    void BorninTest(Double_t& sib);
+    void qqt(Double_t& tai);
 
     Double_t fRCFac;
     Double_t fEbeam;        // The beam energy

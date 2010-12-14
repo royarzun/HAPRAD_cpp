@@ -398,7 +398,7 @@ void TRadCor::Conkin(const Double_t snuc)
     Double_t lm = TMath::Log((_Sxy.sqlm + _Sxy.y) / (_Sxy.sqlm - _Sxy.y));
     _Sxy.allm = lm / _Sxy.sqlm;
     _Sxy.anu  = _Sxy.sx / (2 * kMassProton);
-    _Sxy.an   = TMath::Pi() * kAlpha * kAlpha * _Sxy.ys * _Sxy.sx *
+    _Sxy.an   = kPi * kAlpha * kAlpha * _Sxy.ys * _Sxy.sx *
                                     kMassProton / 2 / _Sxy.sqly * kBarn;
 
     _Sxy.tamax = (_Sxy.sx + _Sxy.sqly) / (2 * mp2);
@@ -446,6 +446,115 @@ void TRadCor::Conkin(const Double_t snuc)
 
 
 void TRadCor::SPhiH(void)
+{
+    Double_t massLepton;
+
+    switch(_phi.ilep) {
+        case 1:
+            massLepton = kMassElectron;
+            break;
+        case 2:
+            massLepton = kMassMuon;
+            break;
+        default:
+            massLepton = kMassElectron;
+    }
+
+    Double_t ml2, mp2;
+    ml2 = TMath::Power(massLepton,2);
+    mp2 = TMath::Power(kMassProton,2);
+
+    Double_t costs, costx, sint;
+
+    costx = (_Sxy.x * (_Sxy.s - _Sxy.x) - 2. * mp2 * _Sxy.y) / _Sxy.sqlx / _Sxy.sqly;
+    costs = (_Sxy.s * (_Sxy.s - _Sxy.x) + 2. * mp2 * _Sxy.y) / _Sxy.sqls / _Sxy.sqly;
+
+    Double_t sxy = _Sxy.s * _Sxy.x * _Sxy.y;
+    Double_t y2  = _Sxy.y * _Sxy.y;
+
+    sint = sxy - mp2 * y2 - ml2 * _Sxy.aly;
+
+    if (sint > 0) {
+        sint = 2. * kMassProton * TMath::Sqrt(sint) / _Sxy.sqls / _Sxy.sqly;
+    } else {
+        std::cout << "sphi: sint = NaN " << sint << std::endl;
+        sint = 0.;
+    }
+
+    _phi.phk12 = - 0.5 * _Sxy.sqls * sint * _phi.pth / kMassProton;
+
+    Double_t vv10 = costs * _phi.plh + sint * _phi.pth * TMath::Cos(fPhi);
+    _phi.vv10 = (_Sxy.s * _phi.ehad - _Sxy.sqls * vv10) / kMassProton;
+
+    Double_t vv20 = costx * _phi.plh + sint * _phi.pth * TMath::Cos(fPhi);
+    _phi.vv20 = (_Sxy.s * _phi.ehad - _Sxy.sqls * vv20) / kMassProton;
+
+    Double_t phk1, phk2;
+    phk1 = 0.5 * (_Sxy.s * _phi.ehad - _Sxy.sqls * costs * _phi.plh) / kMassProton;
+    phk2 = 0.5 * (_Sxy.s * _phi.ehad - _Sxy.sqlx * costx * _phi.plh) / kMassProton;
+
+    _phi.phkp = phk1 + phk2;
+    _phi.phkm = phk2 - phk1;
+
+    Deltas();
+
+    Double_t sibt;
+    Double_t it_end = 3;
+
+    if (_tail.ipol == 0.0) {
+        it_end = 1;
+    }
+
+    for (Int_t i = 1; i <= it_end; ++i) {
+        for (_tail.ita = 1; _tail.ita <= 2; ++_tail.ita) {
+            std::cout << "********** ita: " << _tail.ita
+                      << " *********" << std::endl;
+            if (_tail.ita == 1) {
+                Bornin();
+                BorninTest(sibt);
+                std::cout << "sib1" << fSib << std::endl;
+                std::cout << "sibt" << sibt << std::endl;
+                if (fSib == 0.0) {
+                    fTai[1] = 0.;
+                    continue;
+                }
+            }
+            qqt(fTai[_tail.ita]);
+            std::cout << "tai[" << _tail.ita
+                      << "]\t"  << fTai[_tail.ita] << std::endl;
+        }
+         fDeltaInf = 0.;
+         Double_t extai1 = TMath::Exp(kAlpha / kPi * fDeltaInf);
+         fSig = fSib * extai1 * (1. + kAlpha / kPi * (fDelta - fDeltaInf)) +
+                    fTai[1] + fTai[2];
+    }
+
+}
+
+
+
+void TRadCor::Deltas(void)
+{
+
+}
+
+
+
+void TRadCor::Bornin(void)
+{
+
+}
+
+
+
+void TRadCor::BorninTest(Double_t& sib)
+{
+
+}
+
+
+
+void TRadCor::qqt(Double_t& tai)
 {
 
 }
