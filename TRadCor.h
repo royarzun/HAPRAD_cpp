@@ -39,6 +39,15 @@ struct Phi {
 };
 
 
+struct Pol {
+    double as, bs, cs, ae, be, ce, apn, apq, dk2ks, dksp1, dapks;
+
+    Pol():
+        as(0), bs(0), cs(0), ae(0), be(0), ce(0),
+        apn(0), apq(0), dk2ks(0), dksp1(0), dapks(0) {}
+};
+
+
 struct Tail {
     double un, pl, pn, qn;
     int ita, isf1, isf2, isf3, ipol, iphi_rad, iphi_had;
@@ -99,6 +108,7 @@ private:
 
     Epsilon _eps;
     Phi _phi;
+    Pol _pol;
     Sxy _Sxy;
     Tail _tail;
 };
