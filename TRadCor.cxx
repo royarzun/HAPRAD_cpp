@@ -1,6 +1,6 @@
 #include "TRadCor.h"
 #include "haprad_constants.h"
-#include <cmath>
+#include <iostream>
 
 
 TRadCor::TRadCor()
@@ -173,7 +173,7 @@ void TRadCor::Setup(void)
     nu = - fY / ( 2.0 * kMassProton * fX);
     Sx = 2.0 * kMassProton * nu;
 
-    fMx2 = std::pow(kMassProton,2) + Sx * (1.0 - fZ) + fPt;
+    fMx2 = TMath::Power(kMassProton,2) + Sx * (1.0 - fZ) + fPt;
 }
 
 
@@ -207,6 +207,245 @@ Double_t TRadCor::GetRCFactor(Double_t Ebeam, Double_t x, Double_t q2, Double_t 
 
 
 void TRadCor::Haprad(void)
+{
+    _tail.isf1 = 1;
+    _tail.isf2 = 4;
+    _tail.isf3 = 1;
+
+    _tail.un = 1.;
+    _tail.pl = 0.;
+    _tail.pn = 0.;
+    _tail.qn = 0.;
+
+    _Sxy.xs = fX;
+    _phi.zdif = fZ;
+    _phi.tdif = fPt;
+
+    Double_t snuc = 2. * kMassProton * fEbeam;        // S = 2k_{1}p
+
+    if (fY >= 0.) {
+        _Sxy.ys = fY;
+        _Sxy.y = snuc * _Sxy.xs * _Sxy.ys;
+    } else {
+        _Sxy.y = - fY;
+        _Sxy.ys = _Sxy.y / (snuc * _Sxy.xs);
+    }
+
+    Double_t mp2 = TMath::Power(kMassProton, 2);
+    Double_t yma = 1. / (1. + mp2 * _Sxy.xs / snuc);
+    Double_t ymi = (kMassC2 - mp2) / (snuc * (1. - _Sxy.xs));
+
+    if (_Sxy.ys > yma || _Sxy.ys < ymi || _Sxy.xs > 1. || _Sxy.xs < 0.) {
+        std::cout << " Warning! Wrong kinematics!!!! skip the point!"
+                  << std::endl
+                  << " ys= " << _Sxy.ys << std::endl
+                  << " xs= " << _Sxy.xs << std::endl;
+        return;
+    }
+
+    Conkin(snuc);
+
+    _phi.ehad = _Sxy.anu * _phi.zdif;
+    Double_t sqnuq = TMath::Sqrt(_Sxy.anu * _Sxy.anu + _Sxy.y);
+
+    if (_phi.ehad < kMassDetectedHadron) {
+        std::cout << " Warning! Wrong kinematics!!!! skeep the point!"
+                  << std::endl
+                  << " ehad =" << _phi.ehad
+                  << std::endl;
+        return;
+    }
+
+    Double_t mhh2 = TMath::Power(kMassDetectedHadron,2);
+    _phi.pph = TMath::Sqrt(_phi.ehad * _phi.ehad - mhh2);
+
+    if (_phi.tdif >= 0.) {
+        _phi.pth = _phi.tdif;
+
+        if (_phi.pph < _phi.pth) {
+            std::cout << " Warning! Wrong kinematics!!!! skeep the point!"
+                      << std::endl
+                      << " pph =" << _phi.pph << std::endl
+                      << " pth =" << _phi.pth << std::endl;
+            return;
+        }
+
+        _phi.plh = TMath::Sqrt(_phi.pph * _phi.pph - _phi.pth * _phi.pth);
+
+        if (_phi.pph > _phi.pth)
+            _Sxy.an = _Sxy.an * _Sxy.sqly / 2. / kMassProton / _phi.plh;
+        else
+            _Sxy.an = 0.;
+
+        _phi.tdif = mhh2 - _Sxy.y + 2. * (sqnuq * _phi.plh - _Sxy.anu * _phi.ehad);
+
+        Double_t ptmp = _phi.tdif + _Sxy.y - mhh2 + 2. * _Sxy.anu * _phi.ehad;
+        std::cout << "pl: " << _phi.plh
+                  << "\t"   << _phi.tdif
+                  << "\t"   << _phi.plh - ptmp / 2. / sqnuq
+                  << std::endl;
+    } else {
+        Double_t ptmp = _phi.tdif + _Sxy.y - mhh2 + 2. * _Sxy.anu * _phi.ehad;
+        _phi.plh = ptmp / 2. / sqnuq;
+
+        if (_phi.pph < TMath::Abs(_phi.plh)) {
+            Double_t eps1, eps2, eps3, eps4, eps5, sum;
+
+            eps1 = _phi.tdif * kEpsMachine / sqnuq;
+            eps2 = 2. * mhh2  * kEpsMachine / sqnuq;
+            eps3 = 2. * _Sxy.anu * _phi.ehad * kEpsMachine / sqnuq;
+            eps4 = _phi.tdif + _Sxy.y - mhh2 + 2. * _Sxy.anu * _phi.ehad;
+            eps5 = eps4 / sqnuq * kEpsMachine;
+
+            sum = eps1 * eps1 + eps2 * eps2 + 2. * eps3 * eps3 + eps5 * eps5;
+
+            Double_t epspl  = TMath::Sqrt(sum) / 2.;
+            Double_t calEps = _phi.pph - TMath::Abs(_phi.plh);
+            if (TMath::Abs(calEps) > epspl) {
+               std::cout << "Warning! Wrong kinematics! Skeep the point!"
+                         << std::endl
+                         << "pph  = " << _phi.pph
+                         << std::endl
+                         << "plh  = " << _phi.plh
+                         << "\t"      << calEps
+                         << std::endl;
+               return;
+            } else {
+               std::cout << "Zero pt! " << _phi.plh
+                         << "\t"        << calEps
+                         << "\t"        << epspl
+                         << std::endl;
+               _phi.plh = TMath::Sign(1., _phi.plh) * _phi.pph;
+            }
+        }
+        _phi.pth = TMath::Sqrt(_phi.pph * _phi.pph - _phi.pph * _phi.pph);
+    }
+
+    Double_t p22max = _Sxy.w2 - mhh2;
+    _phi.p22 = mp2 + _Sxy.sx * (1. - _phi.zdif) + _phi.tdif;
+
+    if (_phi.p22 < kMassC2 || _phi.p22 > p22max) {
+        std::cout << "Warning! Wrong kinematics! Skeep the point!"
+                  << std::endl
+                  << "p22  = " << _phi.p22 << std::endl
+                  << "amc2 = " << kMassC2 << std::endl
+                  << "p22m = " << p22max << std::endl;
+        return;
+    }
+
+    _phi.tdmin = mhh2 - _Sxy.y + 2. * (sqnuq * _phi.pph - _Sxy.anu * _phi.ehad);
+
+    Double_t tdmax;
+    tdmax = mhh2 - _Sxy.y + 2. * (- sqnuq * _phi.pph - _Sxy.anu * _phi.ehad);
+
+    if ((_phi.tdif - _phi.tdmin) > kEpsMachine || _phi.tdif < tdmax) {
+        std::cout << "Warning! Wrong kinematics! Skeep the point!"
+                  << std::endl
+                  << "tdif  = " << _phi.tdif << std::endl
+                  << "tdmax = " << tdmax << std::endl
+                  << "tdmin = " << _phi.tdmin
+                  << " " << _phi.tdif - _phi.tdmin
+                  << std::endl;
+        return;
+    }
+
+    SPhiH();
+}
+
+
+
+void TRadCor::Conkin(const Double_t snuc)
+{
+    Double_t massLepton;
+
+    switch(_phi.ilep) {
+        case 1:
+            massLepton = kMassElectron;
+            break;
+        case 2:
+            massLepton = kMassMuon;
+            break;
+        default:
+            massLepton = kMassElectron;
+    }
+
+    Double_t ml2, mp2;
+    ml2 = TMath::Power(massLepton,2);
+    mp2 = TMath::Power(kMassProton,2);
+
+    _Sxy.s   = snuc;
+    _Sxy.x   = _Sxy.s * (1 - _Sxy.ys);
+    _Sxy.sx  = _Sxy.s - _Sxy.x;
+    _Sxy.sxp = _Sxy.s + _Sxy.x;
+    _Sxy.ym  = _Sxy.y + 2 * ml2;
+    _Sxy.tpl = TMath::Power(_Sxy.s, 2) + TMath::Power(_Sxy.x, 2);
+    _Sxy.tmi = TMath::Power(_Sxy.s, 2) - TMath::Power(_Sxy.x, 2);
+    _Sxy.w2  = mp2 + _Sxy.s - _Sxy.y - _Sxy.x;
+    _Sxy.als = _Sxy.s * _Sxy.s - 2 * ml2 * (2 * mp2);
+    _Sxy.alm = _Sxy.y * _Sxy.y + 4 * ml2 * _Sxy.y;
+    _Sxy.aly = TMath::Power(_Sxy.sx, 2) + 4 * mp2 * _Sxy.y;
+
+    if (_Sxy.als < 0) std::cout << "Conkin: als < 0 " << std::endl;
+    if (_Sxy.alx < 0) std::cout << "Conkin: alx < 0 " << std::endl;
+    if (_Sxy.aly < 0) std::cout << "Conkin: aly < 0 " << std::endl;
+    if (_Sxy.alm < 0) std::cout << "Conkin: alm < 0 " << std::endl;
+
+    _Sxy.sqls = TMath::Sqrt(TMath::Max(0., _Sxy.als));
+    _Sxy.sqlx = TMath::Sqrt(TMath::Max(0., _Sxy.alx));
+    _Sxy.sqly = TMath::Sqrt(TMath::Max(0., _Sxy.aly));
+    _Sxy.sqlm = TMath::Sqrt(TMath::Max(0., _Sxy.alm));
+
+    Double_t lm = TMath::Log((_Sxy.sqlm + _Sxy.y) / (_Sxy.sqlm - _Sxy.y));
+    _Sxy.allm = lm / _Sxy.sqlm;
+    _Sxy.anu  = _Sxy.sx / (2 * kMassProton);
+    _Sxy.an   = TMath::Pi() * kAlpha * kAlpha * _Sxy.ys * _Sxy.sx *
+                                    kMassProton / 2 / _Sxy.sqly * kBarn;
+
+    _Sxy.tamax = (_Sxy.sx + _Sxy.sqly) / (2 * mp2);
+    _Sxy.tamin = - _Sxy.y / mp2 / _Sxy.tamax;
+
+    _pol.as = _Sxy.s / 2 / massLepton / _Sxy.sqls;
+    _pol.bs = 0;
+    _pol.cs = - massLepton / _Sxy.sqls;
+
+    if (_tail.ipol != 2) {
+        _pol.ae = kMassProton / _Sxy.sqls;
+        _pol.be = 0;
+        _pol.ce = - _Sxy.s / (2 * kMassProton) / _Sxy.sqls;
+    } else {
+        Double_t sqn;
+
+        sqn = _Sxy.s * _Sxy.x * _Sxy.y - _Sxy.aly * ml2 - mp2 * _Sxy.y * _Sxy.y;
+        if (sqn > 0) {
+            sqn = TMath::Sqrt(sqn);
+        } else {
+            std::cout << "conkin: sqn = NaN " << sqn << std::endl;
+            sqn = 0;
+        }
+
+        _pol.ae = (-_Sxy.s * _Sxy.x + (2 * mp2) * _Sxy.ym) / _Sxy.sqls / sqn / 2;
+        _pol.be = _Sxy.sqls / sqn / 2;
+        _pol.ce = -(_Sxy.s * _Sxy.y + (2 * ml2) * _Sxy.sx) / _Sxy.sqls / sqn / 2;
+    }
+
+    _pol.apq = -_Sxy.y * (_pol.ae - _pol.be) + _pol.ce * _Sxy.sx;
+    _pol.apn = (_Sxy.y + 4 * ml2) * (_pol.ae + _pol.be) + _pol.ce * _Sxy.sxp;
+
+    _pol.dk2ks = _pol.as * _Sxy.ym + (2 * ml2) * _pol.bs + _pol.cs * _Sxy.x;
+    _pol.dksp1 = _pol.as * _Sxy.s + _pol.bs * _Sxy.x + _pol.cs * (2 * mp2);
+    _pol.dapks = (2 * ml2) * (_pol.as * _pol.ae + _pol.bs * _pol.be) +
+                 (2 * mp2) * _pol.cs * _pol.ce +
+                 _Sxy.ym * (_pol.as * _pol.be + _pol.bs * _pol.ae) +
+                 _Sxy.s  * (_pol.as * _pol.ce + _pol.cs * _pol.ae) +
+                 _Sxy.x  * (_pol.bs * _pol.ce + _pol.cs * _pol.be);
+    _pol.dapks *= 2.;
+
+    return;
+}
+
+
+
+void TRadCor::SPhiH(void)
 {
 
 }

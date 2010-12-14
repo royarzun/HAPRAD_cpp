@@ -89,6 +89,8 @@ public:
 private:
     void Setup(void);
     void Haprad(void);
+    void Conkin(const Double_t snuc);
+    void SPhiH();
 
     Double_t fRCFac;
     Double_t fEbeam;        // The beam energy
