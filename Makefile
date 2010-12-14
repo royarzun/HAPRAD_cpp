@@ -65,9 +65,9 @@ DEP_DIR  := .dep
 
 SRC_CLASS  := $(wildcard *.cxx)
 SRC_DEP    := $(addprefix $(DEP_DIR)/,$(SRC_CLASS:.cxx=.d))
-SRC_FOBJ    := $(addprefix $(OBJ_DIR)/,$(SRC_CLASS:.cxx=.o))
+SRC_OBJ    := $(addprefix $(OBJ_DIR)/,$(SRC_CLASS:.cxx=.o))
 DICT_CLASS := $(addprefix $(DICT_DIR)/,$(SRC_CLASS:.cxx=Dict.cxx))
-DICT_FOBJ   := $(addprefix $(OBJ_DIR)/,$(SRC_CLASS:.cxx=Dict.o))
+DICT_OBJ   := $(addprefix $(OBJ_DIR)/,$(SRC_CLASS:.cxx=Dict.o))
 
 SH_LIB     := libTRadCor.so
 
@@ -84,7 +84,7 @@ lib: checkdirs $(SLIB_DIR)/$(SH_LIB)
 include Makefile_depends
 
 
-$(SLIB_DIR)/$(SH_LIB): $(SRC_FOBJ) $(DICT_FOBJ)
+$(SLIB_DIR)/$(SH_LIB): $(SRC_OBJ) $(DICT_OBJ)
 	$(LD) $(SOFLAGS) $(LDFLAGS) $^ $(LIBS) -o $@
 
 
@@ -135,7 +135,5 @@ $(FTEST): $(OBJ_FTEST) $(INC)
 clean:
 	@rm -f  *.o core
 	@rm -rf $(OBJ_DIR) $(DICT_DIR)
-
-distclean: clean
 	@rm -f $(FEXE) $(FTEST) res.dat test.dat
 	@rm -rf $(SLIB_DIR) $(DEP_DIR)
