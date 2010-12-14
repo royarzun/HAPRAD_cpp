@@ -105,8 +105,10 @@ private:
 
     Double_t fSib;
     Double_t fSig;
+    Double_t fDeltaInf;
     Double_t fDelta;
     Double_t fTail;
+    Double_t fTai[3];
 
     Epsilon _eps;
     Phi _phi;
