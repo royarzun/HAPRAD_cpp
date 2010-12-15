@@ -418,29 +418,30 @@ void TRadCor::SPhiH(void)
     ml2 = TMath::Power(massLepton,2);
     mp2 = TMath::Power(kMassProton,2);
 
-    Double_t costs, costx, sint;
+    Double_t costs, costx, sints, sintx;
 
-    costx = (_Sxy.x * (_Sxy.s - _Sxy.x) - 2. * mp2 * _Sxy.y) / _Sxy.sqlx / _Sxy.sqly;
     costs = (_Sxy.s * (_Sxy.s - _Sxy.x) + 2. * mp2 * _Sxy.y) / _Sxy.sqls / _Sxy.sqly;
+    costx = (_Sxy.x * (_Sxy.s - _Sxy.x) - 2. * mp2 * _Sxy.y) / _Sxy.sqlx / _Sxy.sqly;
 
-    Double_t sxy = _Sxy.s * _Sxy.x * _Sxy.y;
-    Double_t y2  = _Sxy.y * _Sxy.y;
+    Double_t lambda;
+    lambda = _Sxy.s * _Sxy.x * _Sxy.y - mp2 * _Sxy.y * _Sxy.y - ml2 * _Sxy.aly;
 
-    sint = sxy - mp2 * y2 - ml2 * _Sxy.aly;
-
-    if (sint > 0) {
-        sint = 2. * kMassProton * TMath::Sqrt(sint) / _Sxy.sqls / _Sxy.sqly;
+    if (lambda > 0) {
+        sints = 2. * kMassProton * TMath::Sqrt(lambda) / _Sxy.sqls / _Sxy.sqly;
+        sintx = 2. * kMassProton * TMath::Sqrt(lambda) / _Sxy.sqlx / _Sxy.sqly;
     } else {
-        std::cout << "sphi: sint = NaN " << sint << std::endl;
-        sint = 0.;
+        std::cout << "sphi: sints = NaN " << sints << std::endl;
+        std::cout << "sphi: sintx = NaN " << sintx << std::endl;
+        sints = 0.;
+        sintx = 0.;
     }
 
+    Double_t vv10, vv20;
+    vv10 = costs * _phi.plh + sints * _phi.pth * TMath::Cos(fPhi);
+    vv20 = costx * _phi.plh + sintx * _phi.pth * TMath::Cos(fPhi);
 
-    Double_t vv10 = costs * _phi.plh + sint * _phi.pth * TMath::Cos(fPhi);
     _phi.vv10 = (_Sxy.s * _phi.ehad - _Sxy.sqls * vv10) / kMassProton;
-
-    Double_t vv20 = costx * _phi.plh + sint * _phi.pth * TMath::Cos(fPhi);
-    _phi.vv20 = (_Sxy.s * _phi.ehad - _Sxy.sqls * vv20) / kMassProton;
+    _phi.vv20 = (_Sxy.x * _phi.ehad - _Sxy.sqlx * vv20) / kMassProton;
 
     Deltas();
 
