@@ -181,8 +181,12 @@ Double_t TRadCor::GetRCFactor(void)
     // Get the radiative correction factor. You must set the parameters before
     // using this method.
 
-    Haprad();
-    fRCFac = fSig / fSib;
+    if (fMx2 > fMaxMx2) {
+        Haprad();
+        fRCFac = fSig / fSib;
+    } else {
+        fRCFac = 0;
+    }
     return fRCFac;
 }
 
