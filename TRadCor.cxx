@@ -14,16 +14,16 @@ TRadCor::TRadCor()
 
 
 
-TRadCor::TRadCor(Double_t Ebeam, Double_t x, Double_t q2, Double_t z,
+TRadCor::TRadCor(Double_t Ebeam, Double_t x, Double_t Q2, Double_t z,
                  Double_t pt, Double_t phi, Double_t maxMx2)
 : fEbeam(Ebeam),
-  fX(x), fY(-q2), fZ(z), fPt(pt), fPhi(phi/kRadianDeg),
+  fX(x), fY(-Q2), fZ(z), fPt(pt), fPhi(phi/kRadianDeg),
   fMaxMx2(0), fMx2(0), fSib(0), fSig(0), fDelta(0), fTail(0),
   _eps(), _phi(), _pol(), _Sxy(), _tail()
 {
     // Normal constructor for a radiative correction object
     //
-    // The Ebeam parameter is the energy of the beam, the x, q2, z, pt and phi
+    // The Ebeam parameter is the energy of the beam, the x, Q2, z, pt and phi
     // are the values of the kinematical variables who describe the cross
     // section of hadron electroproduction, and maxMx2 is the maximum amount of
     // missing mass.
@@ -40,20 +40,20 @@ TRadCor::~TRadCor()
 
 
 
-void TRadCor::SetParameters(Double_t Ebeam, Double_t x, Double_t q2, Double_t z,
+void TRadCor::SetParameters(Double_t Ebeam, Double_t x, Double_t Q2, Double_t z,
                             Double_t pt, Double_t phi, Double_t maxMx2)
 {
     // Set the values for the variables used to calculate the radiative
     // correction.
     //
-    // The Ebeam parameter is the energy of the beam, the x, q2, z, pt and phi
+    // The Ebeam parameter is the energy of the beam, the x, Q2, z, pt and phi
     // are the values of the kinematical variables who describe the cross
     // section of hadron electroproduction, and maxMx2 is the maximum amount of
     // missing mass.
 
     fEbeam = Ebeam;
     fX = x;
-    fY = -q2;
+    fY = -Q2;
     fZ = z;
     fPt = pt;
     fPhi = phi / kRadianDeg;
@@ -79,9 +79,9 @@ void TRadCor::SetX(Double_t x)
 
 
 
-void TRadCor::SetQ2(Double_t q2)
+void TRadCor::SetQ2(Double_t Q2)
 {
-    fY = -q2;
+    fY = -Q2;
     Setup();
 }
 
@@ -190,17 +190,17 @@ Double_t TRadCor::GetRCFactor(void)
 
 
 
-Double_t TRadCor::GetRCFactor(Double_t Ebeam, Double_t x, Double_t q2, Double_t z,
+Double_t TRadCor::GetRCFactor(Double_t Ebeam, Double_t x, Double_t Q2, Double_t z,
                               Double_t pt, Double_t phi, Double_t maxMx2)
 {
     // Get the radiative correction factor for the given parameters.
     //
-    // The Ebeam parameter is the energy of the beam, the x, q2, z, pt and phi
+    // The Ebeam parameter is the energy of the beam, the x, Q2, z, pt and phi
     // are the values of the kinematical variables who describe the cross
     // section of hadron electroproduction, and maxMx2 is the maximum amount of
     // missing mass.
 
-    SetParameters(Ebeam,x,q2,z,pt,phi,maxMx2);
+    SetParameters(Ebeam,x,Q2,z,pt,phi,maxMx2);
     return GetRCFactor();
 }
 
