@@ -80,8 +80,8 @@ public:
 private:
     void Setup(void);
     void Haprad(void);
-    void Conkin();
-    void SPhiH();
+    void Conkin(void);
+    void SPhiH(void);
     void Deltas(void);
     void Bornin(void);
     void BorninTest(Double_t& sib);
