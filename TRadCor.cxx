@@ -165,14 +165,11 @@ void TRadCor::SetPolarization(Int_t type)
 
 void TRadCor::Setup(void)
 {
-    // Calculate the missing mass
+    // Calculate the missing mass squared
 
-    Double_t nu;
     Double_t Sx;
 
-    nu = - fY / ( 2.0 * kMassProton * fX);
-    Sx = 2.0 * kMassProton * nu;
-
+    Sx = - fY / fX;
     fMx2 = TMath::Power(kMassProton,2) + Sx * (1.0 - fZ) + fPt;
 }
 
