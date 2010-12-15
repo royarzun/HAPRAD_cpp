@@ -7,7 +7,7 @@ TRadCor::TRadCor()
 : fEbeam(0),
   fX(0), fY(0), fZ(0), fPt(0), fPhi(0),
   fMaxMx2(0), fMx2(0), fSib(0), fSig(0), fDelta(0), fTail(0),
-  _eps(), _phi(), _pol(), _Sxy(), _tail()
+  _eps(), _phi(), _Sxy(), _tail()
 {
     // Default constructor
 }
@@ -19,7 +19,7 @@ TRadCor::TRadCor(Double_t Ebeam, Double_t x, Double_t Q2, Double_t z,
 : fEbeam(Ebeam),
   fX(x), fY(-Q2), fZ(z), fPt(pt), fPhi(phi/kRadianDeg),
   fMaxMx2(0), fMx2(0), fSib(0), fSig(0), fDelta(0), fTail(0),
-  _eps(), _phi(), _pol(), _Sxy(), _tail()
+  _eps(), _phi(), _Sxy(), _tail()
 {
     // Normal constructor for a radiative correction object
     //
@@ -211,8 +211,6 @@ void TRadCor::Haprad(void)
 
     _tail.un = 1.;
     _tail.pl = 0.;
-    _tail.pn = 0.;
-    _tail.qn = 0.;
 
     _Sxy.xs = fX;
     _phi.zdif = fZ;
@@ -375,8 +373,6 @@ void TRadCor::Conkin(const Double_t snuc)
     _Sxy.sx  = _Sxy.s - _Sxy.x;
     _Sxy.sxp = _Sxy.s + _Sxy.x;
     _Sxy.ym  = _Sxy.y + 2 * ml2;
-    _Sxy.tpl = TMath::Power(_Sxy.s, 2) + TMath::Power(_Sxy.x, 2);
-    _Sxy.tmi = TMath::Power(_Sxy.s, 2) - TMath::Power(_Sxy.x, 2);
     _Sxy.w2  = mp2 + _Sxy.s - _Sxy.y - _Sxy.x;
     _Sxy.als = _Sxy.s * _Sxy.s - 2 * ml2 * (2 * mp2);
     _Sxy.alm = _Sxy.y * _Sxy.y + 4 * ml2 * _Sxy.y;
@@ -400,44 +396,6 @@ void TRadCor::Conkin(const Double_t snuc)
 
     _Sxy.tamax = (_Sxy.sx + _Sxy.sqly) / (2 * mp2);
     _Sxy.tamin = - _Sxy.y / mp2 / _Sxy.tamax;
-
-    _pol.as = _Sxy.s / 2 / massLepton / _Sxy.sqls;
-    _pol.bs = 0;
-    _pol.cs = - massLepton / _Sxy.sqls;
-
-    if (_tail.ipol != 2) {
-        _pol.ae = kMassProton / _Sxy.sqls;
-        _pol.be = 0;
-        _pol.ce = - _Sxy.s / (2 * kMassProton) / _Sxy.sqls;
-    } else {
-        Double_t sqn;
-
-        sqn = _Sxy.s * _Sxy.x * _Sxy.y - _Sxy.aly * ml2 - mp2 * _Sxy.y * _Sxy.y;
-        if (sqn > 0) {
-            sqn = TMath::Sqrt(sqn);
-        } else {
-            std::cout << "conkin: sqn = NaN " << sqn << std::endl;
-            sqn = 0;
-        }
-
-        _pol.ae = (-_Sxy.s * _Sxy.x + (2 * mp2) * _Sxy.ym) / _Sxy.sqls / sqn / 2;
-        _pol.be = _Sxy.sqls / sqn / 2;
-        _pol.ce = -(_Sxy.s * _Sxy.y + (2 * ml2) * _Sxy.sx) / _Sxy.sqls / sqn / 2;
-    }
-
-    _pol.apq = -_Sxy.y * (_pol.ae - _pol.be) + _pol.ce * _Sxy.sx;
-    _pol.apn = (_Sxy.y + 4 * ml2) * (_pol.ae + _pol.be) + _pol.ce * _Sxy.sxp;
-
-    _pol.dk2ks = _pol.as * _Sxy.ym + (2 * ml2) * _pol.bs + _pol.cs * _Sxy.x;
-    _pol.dksp1 = _pol.as * _Sxy.s + _pol.bs * _Sxy.x + _pol.cs * (2 * mp2);
-    _pol.dapks = (2 * ml2) * (_pol.as * _pol.ae + _pol.bs * _pol.be) +
-                 (2 * mp2) * _pol.cs * _pol.ce +
-                 _Sxy.ym * (_pol.as * _pol.be + _pol.bs * _pol.ae) +
-                 _Sxy.s  * (_pol.as * _pol.ce + _pol.cs * _pol.ae) +
-                 _Sxy.x  * (_pol.bs * _pol.ce + _pol.cs * _pol.be);
-    _pol.dapks *= 2.;
-
-    return;
 }
 
 
@@ -478,20 +436,12 @@ void TRadCor::SPhiH(void)
         sint = 0.;
     }
 
-    _phi.phk12 = - 0.5 * _Sxy.sqls * sint * _phi.pth / kMassProton;
 
     Double_t vv10 = costs * _phi.plh + sint * _phi.pth * TMath::Cos(fPhi);
     _phi.vv10 = (_Sxy.s * _phi.ehad - _Sxy.sqls * vv10) / kMassProton;
 
     Double_t vv20 = costx * _phi.plh + sint * _phi.pth * TMath::Cos(fPhi);
     _phi.vv20 = (_Sxy.s * _phi.ehad - _Sxy.sqls * vv20) / kMassProton;
-
-    Double_t phk1, phk2;
-    phk1 = 0.5 * (_Sxy.s * _phi.ehad - _Sxy.sqls * costs * _phi.plh) / kMassProton;
-    phk2 = 0.5 * (_Sxy.s * _phi.ehad - _Sxy.sqlx * costx * _phi.plh) / kMassProton;
-
-    _phi.phkp = phk1 + phk2;
-    _phi.phkm = phk2 - phk1;
 
     Deltas();
 
