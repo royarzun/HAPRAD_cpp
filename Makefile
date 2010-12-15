@@ -63,9 +63,10 @@ OBJ_DIR  := .obj
 DICT_DIR := .dict
 DEP_DIR  := .dep
 
-SRC_CLASS  := $(wildcard *.cxx)
-SRC_DEP    := $(addprefix $(DEP_DIR)/,$(SRC_CLASS:.cxx=.d))
-SRC_OBJ    := $(addprefix $(OBJ_DIR)/,$(SRC_CLASS:.cxx=.o))
+SRC_CODE   := TRadCor.cxx THapradUtils.cxx
+SRC_CLASS  := TRadCor.cxx
+SRC_DEP    := $(addprefix $(DEP_DIR)/,$(SRC_CODE:.cxx=.d))
+SRC_OBJ    := $(addprefix $(OBJ_DIR)/,$(SRC_CODE:.cxx=.o))
 DICT_CLASS := $(addprefix $(DICT_DIR)/,$(SRC_CLASS:.cxx=Dict.cxx))
 DICT_OBJ   := $(addprefix $(OBJ_DIR)/,$(SRC_CLASS:.cxx=Dict.o))
 
