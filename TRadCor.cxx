@@ -216,19 +216,19 @@ void TRadCor::Haprad(void)
     _phi.zdif = fZ;
     _phi.tdif = fPt;
 
-    Double_t snuc = 2. * kMassProton * fEbeam;        // S = 2k_{1}p
+    _Sxy.s = 2. * kMassProton * fEbeam;
 
     if (fY >= 0.) {
         _Sxy.ys = fY;
-        _Sxy.y = snuc * _Sxy.xs * _Sxy.ys;
+        _Sxy.y = _Sxy.s * _Sxy.xs * _Sxy.ys;
     } else {
         _Sxy.y = - fY;
-        _Sxy.ys = _Sxy.y / (snuc * _Sxy.xs);
+        _Sxy.ys = _Sxy.y / (_Sxy.s * _Sxy.xs);
     }
 
     Double_t mp2 = TMath::Power(kMassProton, 2);
-    Double_t yma = 1. / (1. + mp2 * _Sxy.xs / snuc);
-    Double_t ymi = (kMassC2 - mp2) / (snuc * (1. - _Sxy.xs));
+    Double_t yma = 1. / (1. + mp2 * _Sxy.xs / _Sxy.s);
+    Double_t ymi = (kMassC2 - mp2) / (_Sxy.s * (1. - _Sxy.xs));
 
     if (_Sxy.ys > yma || _Sxy.ys < ymi || _Sxy.xs > 1. || _Sxy.xs < 0.) {
         std::cout << " Warning! Wrong kinematics!!!! skip the point!"
@@ -238,7 +238,7 @@ void TRadCor::Haprad(void)
         return;
     }
 
-    Conkin(snuc);
+    Conkin();
 
     _phi.ehad = _Sxy.anu * _phi.zdif;
     Double_t sqnuq = TMath::Sqrt(_Sxy.anu * _Sxy.anu + _Sxy.y);
@@ -349,7 +349,7 @@ void TRadCor::Haprad(void)
 
 
 
-void TRadCor::Conkin(const Double_t snuc)
+void TRadCor::Conkin()
 {
     Double_t massLepton;
 
@@ -368,7 +368,6 @@ void TRadCor::Conkin(const Double_t snuc)
     ml2 = TMath::Power(massLepton,2);
     mp2 = TMath::Power(kMassProton,2);
 
-    _Sxy.s   = snuc;
     _Sxy.x   = _Sxy.s * (1 - _Sxy.ys);
     _Sxy.sx  = _Sxy.s - _Sxy.x;
     _Sxy.sxp = _Sxy.s + _Sxy.x;

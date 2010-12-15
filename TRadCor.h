@@ -80,7 +80,7 @@ public:
 private:
     void Setup(void);
     void Haprad(void);
-    void Conkin(const Double_t snuc);
+    void Conkin();
     void SPhiH();
     void Deltas(void);
     void Bornin(void);
