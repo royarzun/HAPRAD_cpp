@@ -487,6 +487,46 @@ void TRadCor::Deltas(void)
 
 
 
+Double_t TRadCor::VacPol(void)
+{
+    Double_t leptonMass[3] = { 0.26110  * TMath::Power(10,-6),
+                               0.111637 * TMath::Power(10,-1),
+                               3.18301 };
+
+    Double_t suml = 0;
+    for (Int_t i = 0; i < 3; ++i) {
+        Double_t a2    = 2 * leptonMass[i];
+        Double_t sqlmi = TMath::Sqrt(_Sxy.y * _Sxy.y + 2 * a2 * _Sxy.y);
+        Double_t allmi = TMath::Log((sqlmi + _Sxy.y) / (sqlmi - _Sxy.y)) / sqlmi;
+
+        suml =  suml + 2 * (_Sxy.y + a2) * allmi / 3 - 10 / 9 +
+                    4 * a2 * (1 - a2 * allmi) / 3 / _Sxy.y;
+    }
+
+    Double_t a, b, c;
+
+    if (_Sxy.y < 1) {
+        a = -1.345 * TMath::Power(10,-9);
+        b = -2.302 * TMath::Power(10,-3);
+        c = 4.091;
+    } else if (_Sxy.y < 64) {
+        a = -1.512 * TMath::Power(10,-3);
+        b = -2.822 * TMath::Power(10,-3);
+        c =  1.218;
+    } else {
+        a = -1.1344 * TMath::Power(10,-3);
+        b = -3.0680 * TMath::Power(10,-3);
+        c =  9.9992 * TMath::Power(10,-1);
+    }
+
+    Double_t sumh;
+    sumh = - (a + b * TMath::Log(1. + c * _Sxy.y)) * 2 * kPi / kAlpha;
+
+    return suml + sumh;
+}
+
+
+
 void TRadCor::Bornin(void)
 {
 

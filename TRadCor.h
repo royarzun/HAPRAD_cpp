@@ -83,6 +83,7 @@ private:
     void Conkin(void);
     void SPhiH(void);
     void Deltas(void);
+    Double_t VacPol(void);
     void Bornin(void);
     void BorninTest(Double_t& sib);
     void qqt(Double_t& tai);
