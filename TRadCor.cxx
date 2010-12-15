@@ -1,4 +1,5 @@
 #include "TRadCor.h"
+#include "THapradUtils.h"
 #include "haprad_constants.h"
 #include <iostream>
 
@@ -443,7 +444,7 @@ void TRadCor::SPhiH(void)
     _phi.vv10 = (_Sxy.s * _phi.ehad - _Sxy.sqls * vv10) / kMassProton;
     _phi.vv20 = (_Sxy.x * _phi.ehad - _Sxy.sqlx * vv20) / kMassProton;
 
-    Deltas();
+    Deltas(ml2);
 
     Double_t sibt;
     Double_t it_end = 3;
@@ -480,9 +481,35 @@ void TRadCor::SPhiH(void)
 
 
 
-void TRadCor::Deltas(void)
+void TRadCor::Deltas(const Double_t massLepton2)
 {
+    Double_t sum = VacPol();
 
+    Double_t xxh = _Sxy.s - _Sxy.y - _phi.vv10;
+    Double_t ssh = _Sxy.x + _Sxy.y - _phi.vv20;
+
+    Double_t alss = TMath::Power(ssh, 2) - 2. * _phi.p22 * (2 * massLepton2);
+    Double_t alxx = TMath::Power(xxh, 2) - 2. * _phi.p22 * (2 * massLepton2);
+
+    if (alss < 0) std::cout << "deltas: alss < 0 " << alss << std::endl;
+    if (alxx < 0) std::cout << "deltas: alxx < 0 " << alxx << std::endl;
+
+//    Double_t sqlss = TMath::Sqrt(TMath::Max(0., alss));
+//    Double_t sqlxx = TMath::Sqrt(TMath::Max(0., alxx));
+
+//    Double_t allss = TMath::Log((sqlss + ssh) / (-sqlss + ssh)) / sqlss ;
+//    Double_t allxx = TMath::Log((sqlxx + xxh) / (-sqlxx + xxh)) / sqlxx ;
+
+    Double_t dlm = TMath::Log(_Sxy.y / massLepton2);
+
+//    Double_t sfpr = dlm * dlm / 2. - dlm * TMath::Log(ssh * xxh / massLepton2 / _phi.p22) -
+//                    TMath::Power((TMath::Log(ssh / xxh)), 2) / 2. +
+//                    HapradUtils::fspen(1 - _phi.p22 * _Sxy.y / ssh / xxh) - kPi * kPi / 3.;
+
+    fDeltaInf = (dlm - 1) * TMath::Log(TMath::Power(_phi.p22 - kMassC2, 2) / ssh / xxh);
+    fDelta    = fDeltaInf + sum +
+                (1.5 * dlm - 2. - 0.5 * TMath::Power(TMath::Log(xxh / ssh),2) +
+                        HapradUtils::fspen(1. - _phi.p22 * _Sxy.y / ssh / xxh) - kPi * kPi / 6.);
 }
 
 

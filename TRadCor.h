@@ -82,7 +82,7 @@ private:
     void Haprad(void);
     void Conkin(void);
     void SPhiH(void);
-    void Deltas(void);
+    void Deltas(const Double_t massLepton2);
     Double_t VacPol(void);
     void Bornin(void);
     void BorninTest(Double_t& sib);
