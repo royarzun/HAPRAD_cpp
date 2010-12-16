@@ -18,10 +18,10 @@ struct Sxy {
     double tamin, tamax, xs, ys;
 
     Sxy() :
-        s(0), x(0), sx(0), sxp(0), y(0), ym(0), w2(0),
-        als(0), alx(0), alm(0), aly(0), anu(0),
-        sqls(0), sqlx(0), sqly(0), sqlm(0), allm(0), an(0),
-        tamin(0), tamax(0), xs(0), ys(0) {}
+        s(0.), x(0.), sx(0.), sxp(0.), y(0.), ym(0.), w2(0.),
+        als(0.), alx(0.), alm(0.), aly(0.), anu(0.),
+        sqls(0.), sqlx(0.), sqly(0.), sqlm(0.), allm(0.), an(0.),
+        tamin(0.), tamax(0.), xs(0.), ys(0.) {}
 };
 
 
@@ -32,9 +32,9 @@ struct Phi {
     int ilep;
 
     Phi():
-        phirad(0), zdif(0), tdif(0), phidif(0),
-        p22(0), ehad(0), pph(0), plh(0), pth(0),
-        vv10(0), vv20(0), phk12(0), phkp(0), phkm(0), tdmin(0),
+        phirad(0.), zdif(0.), tdif(0.), phidif(0.),
+        p22(0.), ehad(0.), pph(0.), plh(0.), pth(0.),
+        vv10(0.), vv20(0.), phk12(0.), phkp(0.), phkm(0.), tdmin(0.),
         ilep(1) {}
 };
 
@@ -44,7 +44,7 @@ struct Tail {
     int ita, isf1, isf2, isf3, ipol, iphi_rad, iphi_had;
 
     Tail():
-        un(0), pl(0),
+        un(0.), pl(0.),
         ita(0), isf1(0), isf2(0), isf3(0),
         ipol(0), iphi_rad(0), iphi_had(0) {}
 };

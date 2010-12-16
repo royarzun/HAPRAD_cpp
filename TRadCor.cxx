@@ -7,8 +7,8 @@
 
 TRadCor::TRadCor()
 : fEbeam(0),
-  fX(0), fY(0), fZ(0), fPt(0), fPhi(0),
-  fMaxMx2(0), fMx2(0), fSib(0), fSig(0), fDelta(0), fTail(0),
+  fX(0.), fY(0.), fZ(0.), fPt(0.), fPhi(0.),
+  fMaxMx2(0.), fMx2(0.), fSib(0.), fSig(0.), fDelta(0.), fTail(0.),
   _eps(), _phi(), _Sxy(), _tail()
 {
     // Default constructor
@@ -20,7 +20,7 @@ TRadCor::TRadCor(Double_t Ebeam, Double_t x, Double_t Q2, Double_t z,
                  Double_t pt, Double_t phi, Double_t maxMx2)
 : fEbeam(Ebeam),
   fX(x), fY(-Q2), fZ(z), fPt(pt), fPhi(phi/kRadianDeg),
-  fMaxMx2(0), fMx2(0), fSib(0), fSig(0), fDelta(0), fTail(0),
+  fMaxMx2(0.), fMx2(0.), fSib(0.), fSig(0.), fDelta(0.), fTail(0.),
   _eps(), _phi(), _Sxy(), _tail()
 {
     // Normal constructor for a radiative correction object
@@ -394,15 +394,15 @@ void TRadCor::Conkin()
     ml2 = TMath::Power(massLepton,2);
     mp2 = TMath::Power(kMassProton,2);
 
-    _Sxy.x   = _Sxy.s * (1 - _Sxy.ys);
+    _Sxy.x   = _Sxy.s * (1. - _Sxy.ys);
     _Sxy.sx  = _Sxy.s - _Sxy.x;
     _Sxy.sxp = _Sxy.s + _Sxy.x;
-    _Sxy.ym  = _Sxy.y + 2 * ml2;
+    _Sxy.ym  = _Sxy.y + 2. * ml2;
     _Sxy.w2  = mp2 + _Sxy.s - _Sxy.y - _Sxy.x;
-    _Sxy.als = _Sxy.s * _Sxy.s - 2 * ml2 * (2 * mp2);
-    _Sxy.alx = _Sxy.x * _Sxy.x - 2 * ml2 * (2 * mp2);
-    _Sxy.alm = _Sxy.y * _Sxy.y + 4 * ml2 * _Sxy.y;
-    _Sxy.aly = TMath::Power(_Sxy.sx, 2) + 4 * mp2 * _Sxy.y;
+    _Sxy.als = _Sxy.s * _Sxy.s - 2. * ml2 * (2. * mp2);
+    _Sxy.alx = _Sxy.x * _Sxy.x - 2. * ml2 * (2. * mp2);
+    _Sxy.alm = _Sxy.y * _Sxy.y + 4. * ml2 * _Sxy.y;
+    _Sxy.aly = TMath::Power(_Sxy.sx, 2) + 4. * mp2 * _Sxy.y;
 
 #ifdef DEBUG
     std::cout.setf(std::ios::fixed);
@@ -417,10 +417,10 @@ void TRadCor::Conkin()
     std::cout << "aly    " << std::setw(20) << std::setprecision(10) << _Sxy.aly << std::endl;
 #endif
 
-    if (_Sxy.als < 0) std::cout << "Conkin: als < 0 " << std::endl;
-    if (_Sxy.alx < 0) std::cout << "Conkin: alx < 0 " << std::endl;
-    if (_Sxy.aly < 0) std::cout << "Conkin: aly < 0 " << std::endl;
-    if (_Sxy.alm < 0) std::cout << "Conkin: alm < 0 " << std::endl;
+    if (_Sxy.als < 0.) std::cout << "Conkin: als < 0 " << std::endl;
+    if (_Sxy.alx < 0.) std::cout << "Conkin: alx < 0 " << std::endl;
+    if (_Sxy.aly < 0.) std::cout << "Conkin: aly < 0 " << std::endl;
+    if (_Sxy.alm < 0.) std::cout << "Conkin: alm < 0 " << std::endl;
 
     _Sxy.sqls = TMath::Sqrt(TMath::Max(0., _Sxy.als));
     _Sxy.sqlx = TMath::Sqrt(TMath::Max(0., _Sxy.alx));
@@ -429,9 +429,9 @@ void TRadCor::Conkin()
 
     Double_t lm = TMath::Log((_Sxy.sqlm + _Sxy.y) / (_Sxy.sqlm - _Sxy.y));
     _Sxy.allm = lm / _Sxy.sqlm;
-    _Sxy.anu  = _Sxy.sx / (2 * kMassProton);
+    _Sxy.anu  = _Sxy.sx / (2. * kMassProton);
     _Sxy.an   = kPi * kAlpha * kAlpha * _Sxy.ys * _Sxy.sx *
-                                    kMassProton / 2 / _Sxy.sqly * kBarn;
+                                    kMassProton / 2. / _Sxy.sqly * kBarn;
 
 #ifdef DEBUG
     std::cout << "allm   " << std::setw(20) << std::setprecision(10) << _Sxy.allm << std::endl;
@@ -439,7 +439,7 @@ void TRadCor::Conkin()
     std::cout << "an     " << std::setw(20) << std::setprecision(10) << _Sxy.an   << std::endl;
 #endif
 
-    _Sxy.tamax = (_Sxy.sx + _Sxy.sqly) / (2 * mp2);
+    _Sxy.tamax = (_Sxy.sx + _Sxy.sqly) / (2. * mp2);
     _Sxy.tamin = - _Sxy.y / mp2 / _Sxy.tamax;
 }
 
@@ -500,7 +500,7 @@ void TRadCor::SPhiH(void)
     Double_t sibt;
     Double_t it_end = 3;
 
-    if (_tail.ipol == 0.0) {
+    if (_tail.ipol == 0) {
         it_end = 1;
     }
 
@@ -546,11 +546,11 @@ void TRadCor::Deltas(const Double_t massLepton2)
     std::cout << "ssh    " << std::setw(20) << std::setprecision(10) << ssh  << std::endl;
 #endif
 
-    Double_t alss = TMath::Power(ssh, 2) - 2. * _phi.p22 * (2 * massLepton2);
-    Double_t alxx = TMath::Power(xxh, 2) - 2. * _phi.p22 * (2 * massLepton2);
+    Double_t alss = TMath::Power(ssh, 2) - 2. * _phi.p22 * (2. * massLepton2);
+    Double_t alxx = TMath::Power(xxh, 2) - 2. * _phi.p22 * (2. * massLepton2);
 
-    if (alss < 0) std::cout << "deltas: alss < 0 " << alss << std::endl;
-    if (alxx < 0) std::cout << "deltas: alxx < 0 " << alxx << std::endl;
+    if (alss < 0.) std::cout << "deltas: alss < 0 " << alss << std::endl;
+    if (alxx < 0.) std::cout << "deltas: alxx < 0 " << alxx << std::endl;
 
 //    Double_t sqlss = TMath::Sqrt(TMath::Max(0., alss));
 //    Double_t sqlxx = TMath::Sqrt(TMath::Max(0., alxx));
@@ -564,7 +564,7 @@ void TRadCor::Deltas(const Double_t massLepton2)
 //                    TMath::Power((TMath::Log(ssh / xxh)), 2) / 2. +
 //                    HapradUtils::fspen(1 - _phi.p22 * _Sxy.y / ssh / xxh) - kPi * kPi / 3.;
 
-    fDeltaInf = (dlm - 1) * TMath::Log(TMath::Power(_phi.p22 - kMassC2, 2) / ssh / xxh);
+    fDeltaInf = (dlm - 1.) * TMath::Log(TMath::Power(_phi.p22 - kMassC2, 2) / ssh / xxh);
     fDelta    = fDeltaInf + sum +
                 (1.5 * dlm - 2. - 0.5 * TMath::Power(TMath::Log(xxh / ssh),2) +
                         HapradUtils::fspen(1. - _phi.p22 * _Sxy.y / ssh / xxh) - kPi * kPi / 6.);
@@ -580,8 +580,8 @@ Double_t TRadCor::VacPol(void)
 
     Double_t suml = 0;
     for (Int_t i = 0; i < 3; ++i) {
-        Double_t a2    = 2 * leptonMass[i];
-        Double_t sqlmi = TMath::Sqrt(_Sxy.y * _Sxy.y + 2 * a2 * _Sxy.y);
+        Double_t a2    = 2. * leptonMass[i];
+        Double_t sqlmi = TMath::Sqrt(_Sxy.y * _Sxy.y + 2. * a2 * _Sxy.y);
         Double_t allmi = TMath::Log((sqlmi + _Sxy.y) / (sqlmi - _Sxy.y)) / sqlmi;
 
         suml = suml + 2. * (_Sxy.y + a2) * allmi / 3. - 10. / 9. +
@@ -605,7 +605,7 @@ Double_t TRadCor::VacPol(void)
     }
 
     Double_t sumh;
-    sumh = - (a + b * TMath::Log(1. + c * _Sxy.y)) * 2 * kPi / kAlpha;
+    sumh = - (a + b * TMath::Log(1. + c * _Sxy.y)) * 2. * kPi / kAlpha;
 
 #ifdef DEBUG
     std::cout << std::endl;
