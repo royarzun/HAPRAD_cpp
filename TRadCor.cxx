@@ -6,29 +6,33 @@
 
 
 TRadCor::TRadCor()
-: fEbeam(0),
-  fX(0.), fY(0.), fZ(0.), fPt(0.), fPhi(0.),
-  fMaxMx2(0.), fMx2(0.), fSib(0.), fSig(0.), fDelta(0.), fTail(0.),
-  _eps(), _phi(), _Sxy(), _tail()
+: E(0), maxMx2(0.), Mx2(0.),
+  x(0.), y_i(0.), z(0.), t_i(0.), phi(0.),
+  sib(0.), sig(0.), delta(0.), tail(0.),
+  M(kMassProton), m(kMassElectron), m_h(kMassDetectedHadron),
+  eps_phir(0.01), eps_tau(0.001), eps_rr(0.001),
+  polType(0), int_phi_rad(0), int_phi_had(0)
 {
     // Default constructor
 }
 
 
 
-TRadCor::TRadCor(Double_t Ebeam, Double_t x, Double_t Q2, Double_t z,
-                 Double_t pt, Double_t phi, Double_t maxMx2)
-: fEbeam(Ebeam),
-  fX(x), fY(-Q2), fZ(z), fPt(pt), fPhi(phi/kRadianDeg),
-  fMaxMx2(0.), fMx2(0.), fSib(0.), fSig(0.), fDelta(0.), fTail(0.),
-  _eps(), _phi(), _Sxy(), _tail()
+TRadCor::TRadCor(Double_t E, Double_t x, Double_t Q2, Double_t z,
+                 Double_t p_t, Double_t phi, Double_t maxMx2)
+: E(0), maxMx2(0.), Mx2(0.),
+  x(0.), y_i(0.), z(0.), t_i(0.), phi(0.),
+  sib(0.), sig(0.), delta(0.), tail(0.),
+  M(kMassProton), m(kMassElectron), m_h(kMassDetectedHadron),
+  eps_phir(0.01), eps_tau(0.001), eps_rr(0.001),
+  polType(0), int_phi_rad(0), int_phi_had(0)
 {
     // Normal constructor for a radiative correction object
     //
-    // The Ebeam parameter is the energy of the beam, the x, Q2, z, pt and phi
+    // The E parameter is the energy of the beam, the x, Q2, z, p_t and phi
     // are the values of the kinematical variables who describe the cross
-    // section of hadron electroproduction, and maxMx2 is the maximum amount of
-    // missing mass.
+    // section of hadron electroproduction, and maxMx2 is the maximum amount
+    // of missing mass.
 
     Setup();
 }
@@ -42,40 +46,42 @@ TRadCor::~TRadCor()
 
 
 
-void TRadCor::SetParameters(Double_t Ebeam, Double_t x, Double_t Q2, Double_t z,
-                            Double_t pt, Double_t phi, Double_t maxMx2)
+void TRadCor::SetParameters(Double_t E, Double_t x, Double_t Q2, Double_t z,
+                            Double_t p_t, Double_t phi, Double_t maxMx2)
 {
     // Set the values for the variables used to calculate the radiative
     // correction.
     //
-    // The Ebeam parameter is the energy of the beam, the x, Q2, z, pt and phi
+    // The E parameter is the energy of the beam, the x, Q2, z, p_t and phi
     // are the values of the kinematical variables who describe the cross
-    // section of hadron electroproduction, and maxMx2 is the maximum amount of
-    // missing mass.
+    // section of hadron electroproduction, and maxMx2 is the maximum amount
+    // of missing mass.
 
-    fEbeam = Ebeam;
-    fX = x;
-    fY = -Q2;
-    fZ = z;
-    fPt = pt;
-    fPhi = phi / kRadianDeg;
-    fMaxMx2 = maxMx2;
+    this->E   = E;
+
+    this->x   = x;
+    this->y_i = -Q2;
+    this->z   = z;
+    this->t_i = p_t;
+    this->phi = phi / kRadianDeg;
+
+    this->maxMx2 = maxMx2;
 
     Setup();
 }
 
 
 
-void TRadCor::SetEbeam(Double_t Ebeam)
+void TRadCor::SetEbeam(Double_t E)
 {
-    fEbeam = Ebeam;
+    this->E = E;
 }
 
 
 
 void TRadCor::SetX(Double_t x)
 {
-    fX = x;
+    this->x = x;
     Setup();
 }
 
@@ -83,7 +89,7 @@ void TRadCor::SetX(Double_t x)
 
 void TRadCor::SetQ2(Double_t Q2)
 {
-    fY = -Q2;
+    this->y_i = -Q2;
     Setup();
 }
 
@@ -91,15 +97,15 @@ void TRadCor::SetQ2(Double_t Q2)
 
 void TRadCor::SetZ(Double_t z)
 {
-    fZ = z;
+    this->z = z;
     Setup();
 }
 
 
 
-void TRadCor::SetPt(Double_t pt)
+void TRadCor::SetPt(Double_t p_t)
 {
-    fPt = pt;
+    this->t_i = p_t;
     Setup();
 }
 
@@ -107,14 +113,14 @@ void TRadCor::SetPt(Double_t pt)
 
 void TRadCor::SetPhi(Double_t phi)
 {
-    fPhi = phi / kRadianDeg;
+    this->phi = phi / kRadianDeg;
 }
 
 
 
 void TRadCor::SetMaxMx(Double_t maxMx2)
 {
-    fMaxMx2 = maxMx2;
+    this->maxMx2 = maxMx2;
 }
 
 
@@ -125,7 +131,14 @@ void TRadCor::RegisteredLepton(Int_t type)
     //
     // Default is 1.
 
-    _phi.ilep = type;
+    switch(type) {
+        case 1:
+            m = kMassElectron;
+            break;
+        case 2:
+            m = kMassMuon;
+            break;
+    }
 }
 
 
@@ -136,7 +149,7 @@ void TRadCor::IntegratePhiRad(Int_t type)
     //
     // Default is 0;
 
-    _tail.iphi_rad = type;
+    int_phi_rad = type;
 }
 
 
@@ -147,7 +160,7 @@ void TRadCor::IntegratePhiHad(Int_t type)
     //
     // Default is 0;
 
-    _tail.iphi_had = type;
+    int_phi_had = type;
 }
 
 
@@ -160,7 +173,7 @@ void TRadCor::SetPolarization(Int_t type)
     //
     // Default is 0;
 
-    _tail.ipol = type;
+    polType = type;
 }
 
 
@@ -169,10 +182,8 @@ void TRadCor::Setup(void)
 {
     // Calculate the missing mass squared
 
-    Double_t Sx;
-
-    Sx = - fY / fX;
-    fMx2 = TMath::Power(kMassProton,2) + Sx * (1.0 - fZ) + fPt;
+    Double_t S_x = - y_i / x;
+    Mx2 = M * M + S_x * (1.0 - z) + t_i;
 }
 
 
@@ -182,28 +193,28 @@ Double_t TRadCor::GetRCFactor(void)
     // Get the radiative correction factor. You must set the parameters before
     // using this method.
 
-    if (fMx2 > fMaxMx2) {
+    if (Mx2 > maxMx2) {
         Haprad();
-        fRCFac = fSig / fSib;
+        rc = sig / sib;
     } else {
-        fRCFac = 0;
+        rc = 0;
     }
-    return fRCFac;
+    return rc;
 }
 
 
 
-Double_t TRadCor::GetRCFactor(Double_t Ebeam, Double_t x, Double_t Q2, Double_t z,
-                              Double_t pt, Double_t phi, Double_t maxMx2)
+Double_t TRadCor::GetRCFactor(Double_t E, Double_t x, Double_t Q2, Double_t z,
+                              Double_t p_t, Double_t phi, Double_t maxMx2)
 {
     // Get the radiative correction factor for the given parameters.
     //
-    // The Ebeam parameter is the energy of the beam, the x, Q2, z, pt and phi
+    // The E parameter is the energy of the beam, the x, Q2, z, p_t and phi
     // are the values of the kinematical variables who describe the cross
     // section of hadron electroproduction, and maxMx2 is the maximum amount of
     // missing mass.
 
-    SetParameters(Ebeam,x,Q2,z,pt,phi,maxMx2);
+    SetParameters(E,x,Q2,z,p_t,phi,maxMx2);
     return GetRCFactor();
 }
 
@@ -211,162 +222,149 @@ Double_t TRadCor::GetRCFactor(Double_t Ebeam, Double_t x, Double_t Q2, Double_t 
 
 void TRadCor::Haprad(void)
 {
-    _tail.isf1 = 1;
-    _tail.isf2 = 4;
-    _tail.isf3 = 1;
+    isf1 = 1;
+    isf2 = 4;
+    isf3 = 1;
 
-    _tail.un = 1.;
-    _tail.pl = 0.;
+    un = 1.;
+    pl = 0.;
 
-    _Sxy.xs = fX;
-    _phi.zdif = fZ;
-    _phi.tdif = fPt;
+    S = 2. * M * E;
 
-    _Sxy.s = 2. * kMassProton * fEbeam;
-
-    if (fY >= 0.) {
-        _Sxy.ys = fY;
-        _Sxy.y = _Sxy.s * _Sxy.xs * _Sxy.ys;
+    if (y_i >= 0.) {
+        y = y_i;
+        Q2 = S * x * y;
     } else {
-        _Sxy.y = - fY;
-        _Sxy.ys = _Sxy.y / (_Sxy.s * _Sxy.xs);
+        Q2 = - y_i;
+        y = Q2 / (S * x);
     }
 
 #ifdef DEBUG
     std::cout.setf(std::ios::fixed);
-    std::cout << "S      " << std::setw(20) << std::setprecision(10) << _Sxy.s  << std::endl;
-    std::cout << "y      " << std::setw(20) << std::setprecision(10) << _Sxy.ys << std::endl;
-    std::cout << "Q^2    " << std::setw(20) << std::setprecision(10) << _Sxy.y  << std::endl;
+    std::cout << "S      " << std::setw(20) << std::setprecision(10) << S  << std::endl;
+    std::cout << "y      " << std::setw(20) << std::setprecision(10) << y << std::endl;
+    std::cout << "Q^2    " << std::setw(20) << std::setprecision(10) << Q2  << std::endl;
 #endif
 
-    Double_t mp2 = TMath::Power(kMassProton, 2);
-    Double_t yma = 1. / (1. + mp2 * _Sxy.xs / _Sxy.s);
-    Double_t ymi = (kMassC2 - mp2) / (_Sxy.s * (1. - _Sxy.xs));
+    Double_t y_max = 1. / (1. + M * M * x / S);
+    Double_t y_min = (kMassC2 - M * M) / (S * (1. - x));
 
-    if (_Sxy.ys > yma || _Sxy.ys < ymi || _Sxy.xs > 1. || _Sxy.xs < 0.) {
-        std::cout << " Warning! Wrong kinematics!!!! skip the point!"
+    if (y > y_max || y < y_min || x > 1. || x < 0.) {
+        std::cout << " Warning! Wrong kinematics! Skip the point!"
                   << std::endl
-                  << " ys= " << _Sxy.ys << std::endl
-                  << " xs= " << _Sxy.xs << std::endl;
+                  << " y = " << y << std::endl
+                  << " x = " << x << std::endl;
         return;
     }
 
     Conkin();
 
-    _phi.ehad = _Sxy.anu * _phi.zdif;
+    E_h = nu * z;
 #ifdef DEBUG
-    std::cout << "Eh     " << std::setw(20) << std::setprecision(10) << _phi.ehad  << std::endl;
+    std::cout << "Eh     " << std::setw(20) << std::setprecision(10) << E_h  << std::endl;
 #endif
-    Double_t sqnuq = TMath::Sqrt(_Sxy.anu * _Sxy.anu + _Sxy.y);
 
-    if (_phi.ehad < kMassDetectedHadron) {
-        std::cout << " Warning! Wrong kinematics!!!! skeep the point!"
+    Double_t sqnuq = TMath::Sqrt(nu * nu + Q2);
+
+    if (E_h < m_h) {
+        std::cout << " Warning! Wrong kinematics! Skip the point!"
                   << std::endl
-                  << " ehad =" << _phi.ehad
+                  << " E_h =" << E_h
                   << std::endl;
         return;
     }
 
-    Double_t mhh2 = TMath::Power(kMassDetectedHadron,2);
-
-    _phi.pph = TMath::Sqrt(_phi.ehad * _phi.ehad - mhh2);
+    p_h = TMath::Sqrt(E_h * E_h - m_h * m_h);
 #ifdef DEBUG
-    std::cout << "Ph     " << std::setw(20) << std::setprecision(10) << _phi.pph  << std::endl;
+    std::cout << "Ph     " << std::setw(20) << std::setprecision(10) << p_h  << std::endl;
 #endif
 
-    if (_phi.tdif >= 0.) {
-        _phi.pth = _phi.tdif;
+    t = t_i;
 
-        if (_phi.pph < _phi.pth) {
-            std::cout << " Warning! Wrong kinematics!!!! skeep the point!"
+    if (t >= 0.) {
+        p_t = t;
+
+        if (p_h < p_t) {
+            std::cout << " Warning! Wrong kinematics! Skip the point!"
                       << std::endl
-                      << " pph =" << _phi.pph << std::endl
-                      << " pth =" << _phi.pth << std::endl;
+                      << " p_h = " << p_h << std::endl
+                      << " p_t = " << p_t << std::endl;
             return;
         }
 
-        _phi.plh = TMath::Sqrt(_phi.pph * _phi.pph - _phi.pth * _phi.pth);
+        p_l = TMath::Sqrt(p_h * p_h - p_t * p_t);
 
-        if (_phi.pph > _phi.pth)
-            _Sxy.an = _Sxy.an * _Sxy.sqly / 2. / kMassProton / _phi.plh;
-        else
-            _Sxy.an = 0.;
+        if (p_h > p_t) {
+            Double_t sqrt_lq = TMath::Sqrt(TMath::Max(0., lambda_q));
+            N = N * sqrt_lq / 2. / M / p_l;
+        } else {
+            N = 0.;
+        }
 
-        _phi.tdif = mhh2 - _Sxy.y + 2. * (sqnuq * _phi.plh - _Sxy.anu * _phi.ehad);
+        t = m_h * m_h - Q2 + 2. * (sqnuq * p_l - nu * E_h);
 
-        Double_t ptmp = _phi.tdif + _Sxy.y - mhh2 + 2. * _Sxy.anu * _phi.ehad;
-        std::cout << "pl: " << _phi.plh
-                  << "\t"   << _phi.tdif
-                  << "\t"   << _phi.plh - ptmp / 2. / sqnuq
+        std::cout << "p_l: " << p_l << "\t" << t << "\t"
+                  << p_l - t + Q2 - m_h * m_h + 2. * nu * E_h / 2. / sqnuq
                   << std::endl;
     } else {
-        Double_t ptmp = _phi.tdif + _Sxy.y - mhh2 + 2. * _Sxy.anu * _phi.ehad;
-        _phi.plh = ptmp / 2. / sqnuq;
+        p_l = (t + Q2 - m_h * m_h + 2. * nu * E_h) / 2. / sqnuq;
 
-        if (_phi.pph < TMath::Abs(_phi.plh)) {
+        if (p_h < TMath::Abs(p_l)) {
             Double_t eps1, eps2, eps3, eps4, eps5, sum;
 
-            eps1 = _phi.tdif * kEpsMachine / sqnuq;
-            eps2 = 2. * mhh2  * kEpsMachine / sqnuq;
-            eps3 = 2. * _Sxy.anu * _phi.ehad * kEpsMachine / sqnuq;
-            eps4 = _phi.tdif + _Sxy.y - mhh2 + 2. * _Sxy.anu * _phi.ehad;
+            eps1 = t * kEpsMachine / sqnuq;
+            eps2 = 2. * m_h * m_h  * kEpsMachine / sqnuq;
+            eps3 = 2. * nu * E_h * kEpsMachine / sqnuq;
+            eps4 = t + Q2 - m_h * m_h + 2. * nu * E_h;
             eps5 = eps4 / sqnuq * kEpsMachine;
 
             sum = eps1 * eps1 + eps2 * eps2 + 2. * eps3 * eps3 + eps5 * eps5;
 
             Double_t epspl  = TMath::Sqrt(sum) / 2.;
-            Double_t calEps = _phi.pph - TMath::Abs(_phi.plh);
+            Double_t calEps = p_h - TMath::Abs(p_l);
             if (TMath::Abs(calEps) > epspl) {
-               std::cout << "Warning! Wrong kinematics! Skeep the point!"
-                         << std::endl
-                         << "pph  = " << _phi.pph
-                         << std::endl
-                         << "plh  = " << _phi.plh
-                         << "\t"      << calEps
-                         << std::endl;
+               std::cout << " Warning! Wrong kinematics! Skeep the point!"
+                         << std::endl << " p_h  = " << p_h
+                         << std::endl << " p_l  = " << p_l
+                         << "\t"      << calEps << std::endl;
                return;
             } else {
-               std::cout << "Zero pt! " << _phi.plh
-                         << "\t"        << calEps
-                         << "\t"        << epspl
-                         << std::endl;
-               _phi.plh = TMath::Sign(1., _phi.plh) * _phi.pph;
+               std::cout << "Zero p_t! " << p_l
+                         << "\t"         << calEps
+                         << "\t"         << epspl << std::endl;
+               p_l = TMath::Sign(1., p_l) * p_h;
             }
         }
-        _phi.pth = TMath::Sqrt(_phi.pph * _phi.pph - _phi.plh * _phi.plh);
+        p_t = TMath::Sqrt(p_h * p_h - p_l * p_l);
     }
 
 #ifdef DEBUG
-    std::cout << "Pt     " << std::setw(20) << std::setprecision(10) << _phi.pth  << std::endl;
-    std::cout << "Pl     " << std::setw(20) << std::setprecision(10) << _phi.plh  << std::endl;
-    std::cout << "tdif   " << std::setw(20) << std::setprecision(10) << _phi.tdif << std::endl;
+    std::cout << "Pt     " << std::setw(20) << std::setprecision(10) << p_t  << std::endl;
+    std::cout << "Pl     " << std::setw(20) << std::setprecision(10) << p_l  << std::endl;
+    std::cout << "tdif   " << std::setw(20) << std::setprecision(10) << t << std::endl;
 #endif
 
-    Double_t p22max = _Sxy.w2 - mhh2;
-    _phi.p22 = mp2 + _Sxy.sx * (1. - _phi.zdif) + _phi.tdif;
+    Double_t px2_max = W2 - m_h * m_h;
+    px2 = M * M + S_x * (1. - z) + t;
 
-    if (_phi.p22 < kMassC2 || _phi.p22 > p22max) {
-        std::cout << "Warning! Wrong kinematics! Skeep the point!"
-                  << std::endl
-                  << "p22  = " << _phi.p22 << std::endl
-                  << "amc2 = " << kMassC2 << std::endl
-                  << "p22m = " << p22max << std::endl;
+    if (px2 < kMassC2 || px2 > px2_max) {
+        std::cout << " Warning! Wrong kinematics! Skeep the point!" << std::endl
+                  << " p_x^2     = " << px2 << std::endl
+                  << " mc2       = " << kMassC2 << std::endl
+                  << " p_x^2 max = " << px2_max << std::endl;
         return;
     }
 
-    _phi.tdmin = mhh2 - _Sxy.y + 2. * (sqnuq * _phi.pph - _Sxy.anu * _phi.ehad);
+    t_min = m_h * m_h - Q2 + 2. * (sqnuq * p_h - nu * E_h);
 
     Double_t tdmax;
-    tdmax = mhh2 - _Sxy.y + 2. * (- sqnuq * _phi.pph - _Sxy.anu * _phi.ehad);
+    tdmax = m_h * m_h - Q2 + 2. * (- sqnuq * p_h - nu * E_h);
 
-    if ((_phi.tdif - _phi.tdmin) > kEpsMachine || _phi.tdif < tdmax) {
-        std::cout << "Warning! Wrong kinematics! Skeep the point!"
-                  << std::endl
-                  << "tdif  = " << _phi.tdif << std::endl
-                  << "tdmax = " << tdmax << std::endl
-                  << "tdmin = " << _phi.tdmin
-                  << " " << _phi.tdif - _phi.tdmin
-                  << std::endl;
+    if ((t - t_min) > kEpsMachine || t < tdmax) {
+        std::cout << " Warning! Wrong kinematics! Skeep the point!" << std::endl
+                  << " t     = " << t << std::endl
+                  << " t_max = " << tdmax << std::endl
+                  << " t_min = " << t_min << " - " << t - t_min << std::endl;
         return;
     }
 
@@ -377,104 +375,70 @@ void TRadCor::Haprad(void)
 
 void TRadCor::Conkin()
 {
-    Double_t massLepton;
+    X   = S * (1. - y);
+    S_x = S - X;
+    S_p = S + X;
+    W2  = S - X - Q2 + M * M;
 
-    switch(_phi.ilep) {
-        case 1:
-            massLepton = kMassElectron;
-            break;
-        case 2:
-            massLepton = kMassMuon;
-            break;
-        default:
-            massLepton = kMassElectron;
-    }
-
-    Double_t ml2, mp2;
-    ml2 = TMath::Power(massLepton,2);
-    mp2 = TMath::Power(kMassProton,2);
-
-    _Sxy.x   = _Sxy.s * (1. - _Sxy.ys);
-    _Sxy.sx  = _Sxy.s - _Sxy.x;
-    _Sxy.sxp = _Sxy.s + _Sxy.x;
-    _Sxy.ym  = _Sxy.y + 2. * ml2;
-    _Sxy.w2  = mp2 + _Sxy.s - _Sxy.y - _Sxy.x;
-    _Sxy.als = _Sxy.s * _Sxy.s - 2. * ml2 * (2. * mp2);
-    _Sxy.alx = _Sxy.x * _Sxy.x - 2. * ml2 * (2. * mp2);
-    _Sxy.alm = _Sxy.y * _Sxy.y + 4. * ml2 * _Sxy.y;
-    _Sxy.aly = TMath::Power(_Sxy.sx, 2) + 4. * mp2 * _Sxy.y;
+    lambda_s = S * S - 4. * m * m * M * M;
+    lambda_x = X * X - 4. * m * m * M * M;
+    lambda_m = Q2 * Q2 + 4. * m * m * Q2;
+    lambda_q = TMath::Power(S_x, 2) + 4. * M * M * Q2;
 
 #ifdef DEBUG
     std::cout.setf(std::ios::fixed);
-    std::cout << "x      " << std::setw(20) << std::setprecision(10) << _Sxy.x   << std::endl;
-    std::cout << "sx     " << std::setw(20) << std::setprecision(10) << _Sxy.sx  << std::endl;
-    std::cout << "sxp    " << std::setw(20) << std::setprecision(10) << _Sxy.sxp << std::endl;
-    std::cout << "ym     " << std::setw(20) << std::setprecision(10) << _Sxy.ym  << std::endl;
-    std::cout << "w2     " << std::setw(20) << std::setprecision(10) << _Sxy.w2  << std::endl;
-    std::cout << "als    " << std::setw(20) << std::setprecision(10) << _Sxy.als << std::endl;
-    std::cout << "alx    " << std::setw(20) << std::setprecision(10) << _Sxy.alx << std::endl;
-    std::cout << "alm    " << std::setw(20) << std::setprecision(10) << _Sxy.alm << std::endl;
-    std::cout << "aly    " << std::setw(20) << std::setprecision(10) << _Sxy.aly << std::endl;
+    std::cout << "X      " << std::setw(20) << std::setprecision(10) << X        << std::endl;
+    std::cout << "S_x    " << std::setw(20) << std::setprecision(10) << S_x      << std::endl;
+    std::cout << "S_p    " << std::setw(20) << std::setprecision(10) << S_p      << std::endl;
+    std::cout << "W2     " << std::setw(20) << std::setprecision(10) << W2       << std::endl;
+    std::cout << "l_s    " << std::setw(20) << std::setprecision(10) << lambda_s << std::endl;
+    std::cout << "l_x    " << std::setw(20) << std::setprecision(10) << lambda_x << std::endl;
+    std::cout << "l_m    " << std::setw(20) << std::setprecision(10) << lambda_m << std::endl;
+    std::cout << "l_q    " << std::setw(20) << std::setprecision(10) << lambda_q << std::endl;
 #endif
 
-    if (_Sxy.als < 0.) std::cout << "Conkin: als < 0 " << std::endl;
-    if (_Sxy.alx < 0.) std::cout << "Conkin: alx < 0 " << std::endl;
-    if (_Sxy.aly < 0.) std::cout << "Conkin: aly < 0 " << std::endl;
-    if (_Sxy.alm < 0.) std::cout << "Conkin: alm < 0 " << std::endl;
+    if (lambda_s < 0.) std::cout << " Conkin: lambda_s < 0 " << std::endl;
+    if (lambda_x < 0.) std::cout << " Conkin: lambda_x < 0 " << std::endl;
+    if (lambda_q < 0.) std::cout << " Conkin: lambda_q < 0 " << std::endl;
+    if (lambda_m < 0.) std::cout << " Conkin: lambda_m < 0 " << std::endl;
 
-    _Sxy.sqls = TMath::Sqrt(TMath::Max(0., _Sxy.als));
-    _Sxy.sqlx = TMath::Sqrt(TMath::Max(0., _Sxy.alx));
-    _Sxy.sqly = TMath::Sqrt(TMath::Max(0., _Sxy.aly));
-    _Sxy.sqlm = TMath::Sqrt(TMath::Max(0., _Sxy.alm));
 
-    Double_t lm = TMath::Log((_Sxy.sqlm + _Sxy.y) / (_Sxy.sqlm - _Sxy.y));
-    _Sxy.allm = lm / _Sxy.sqlm;
-    _Sxy.anu  = _Sxy.sx / (2. * kMassProton);
-    _Sxy.an   = kPi * kAlpha * kAlpha * _Sxy.ys * _Sxy.sx *
-                                    kMassProton / 2. / _Sxy.sqly * kBarn;
+    Double_t sqrt_lq, sqrt_lm;
+    sqrt_lq = TMath::Sqrt(TMath::Max(0., lambda_q));
+    sqrt_lm = TMath::Sqrt(TMath::Max(0., lambda_m));
+
+    nu  = S_x / (2. * M);
+    N   = kPi * kAlpha * kAlpha * y * S_x * M / 2. / sqrt_lq * kBarn;
 
 #ifdef DEBUG
-    std::cout << "allm   " << std::setw(20) << std::setprecision(10) << _Sxy.allm << std::endl;
-    std::cout << "anu    " << std::setw(20) << std::setprecision(10) << _Sxy.anu  << std::endl;
-    std::cout << "an     " << std::setw(20) << std::setprecision(10) << _Sxy.an   << std::endl;
+    std::cout << "nu     " << std::setw(20) << std::setprecision(10) << nu << std::endl;
+    std::cout << "N      " << std::setw(20) << std::setprecision(10) << N << std::endl;
 #endif
 
-    _Sxy.tamax = (_Sxy.sx + _Sxy.sqly) / (2. * mp2);
-    _Sxy.tamin = - _Sxy.y / mp2 / _Sxy.tamax;
+    tau_max = (S_x + sqrt_lq) / (2. * M * M);
+    tau_min = - Q2 / (M * M) / tau_max;
 }
 
 
 
 void TRadCor::SPhiH(void)
 {
-    Double_t massLepton;
-
-    switch(_phi.ilep) {
-        case 1:
-            massLepton = kMassElectron;
-            break;
-        case 2:
-            massLepton = kMassMuon;
-            break;
-        default:
-            massLepton = kMassElectron;
-    }
-
-    Double_t ml2, mp2;
-    ml2 = TMath::Power(massLepton,2);
-    mp2 = TMath::Power(kMassProton,2);
-
+    Double_t sqrt_ls, sqrt_lx, sqrt_lq;
     Double_t costs, costx, sints, sintx;
-
-    costs = (_Sxy.s * (_Sxy.s - _Sxy.x) + 2. * mp2 * _Sxy.y) / _Sxy.sqls / _Sxy.sqly;
-    costx = (_Sxy.x * (_Sxy.s - _Sxy.x) - 2. * mp2 * _Sxy.y) / _Sxy.sqlx / _Sxy.sqly;
-
     Double_t lambda;
-    lambda = _Sxy.s * _Sxy.x * _Sxy.y - mp2 * _Sxy.y * _Sxy.y - ml2 * _Sxy.aly;
+
+    sqrt_ls = TMath::Sqrt(TMath::Max(0., lambda_s));
+    sqrt_lx = TMath::Sqrt(TMath::Max(0., lambda_x));
+    sqrt_lq = TMath::Sqrt(TMath::Max(0., lambda_q));
+
+    costs = (S * (S - X) + 2. * M * M * Q2) / sqrt_ls / sqrt_lq;
+    costx = (X * (S - X) - 2. * M * M * Q2) / sqrt_lx / sqrt_lq;
+
+    lambda = S * X * Q2 - M * M * Q2 * Q2 - m * m * lambda_q;
 
     if (lambda > 0) {
-        sints = 2. * kMassProton * TMath::Sqrt(lambda) / _Sxy.sqls / _Sxy.sqly;
-        sintx = 2. * kMassProton * TMath::Sqrt(lambda) / _Sxy.sqlx / _Sxy.sqly;
+        sints = 2. * M * TMath::Sqrt(lambda) / sqrt_ls / sqrt_lq;
+        sintx = 2. * M * TMath::Sqrt(lambda) / sqrt_lx / sqrt_lq;
     } else {
         std::cout << "sphi: sints = NaN " << lambda << std::endl;
         std::cout << "sphi: sintx = NaN " << lambda << std::endl;
@@ -482,92 +446,82 @@ void TRadCor::SPhiH(void)
         sintx = 0.;
     }
 
-    Double_t vv10, vv20;
-    vv10 = costs * _phi.plh + sints * _phi.pth * TMath::Cos(fPhi);
-    vv20 = costx * _phi.plh + sintx * _phi.pth * TMath::Cos(fPhi);
+    Double_t v1, v2;
+    v1 = costs * p_l + sints * p_t * TMath::Cos(phi);
+    v2 = costx * p_l + sintx * p_t * TMath::Cos(phi);
 
-    _phi.vv10 = (_Sxy.s * _phi.ehad - _Sxy.sqls * vv10) / kMassProton;
-    _phi.vv20 = (_Sxy.x * _phi.ehad - _Sxy.sqlx * vv20) / kMassProton;
+    V_1 = (S * E_h - sqrt_ls * v1) / M;
+    V_2 = (X * E_h - sqrt_lx * v2) / M;
 
 #ifdef DEBUG
     std::cout.setf(std::ios::fixed);
-    std::cout << "V1     " << std::setw(20) << std::setprecision(10) << _phi.vv10  << std::endl;
-    std::cout << "V2     " << std::setw(20) << std::setprecision(10) << _phi.vv20  << std::endl;
+    std::cout << "V1     " << std::setw(20) << std::setprecision(10) << V_1  << std::endl;
+    std::cout << "V2     " << std::setw(20) << std::setprecision(10) << V_2  << std::endl;
 #endif
 
-    Deltas(ml2);
+    Deltas();
 
     Double_t sibt;
     Int_t it_end = 3;
 
-    if (_tail.ipol == 0) {
+    if (polType == 0) {
         it_end = 1;
     }
 
     for (Int_t i = 1; i <= it_end; ++i) {
-        for (_tail.ita = 1; _tail.ita <= 2; ++_tail.ita) {
-            std::cout << "********** ita: " << _tail.ita
+        for (ita = 1; ita <= 2; ++ita) {
+            std::cout << "********** ita: " << ita
                       << " *********" << std::endl;
-            if (_tail.ita == 1) {
+            if (ita == 1) {
                 Bornin();
                 BorninTest(sibt);
-                std::cout << "sib1" << fSib << std::endl;
+                std::cout << "sib1" << sib << std::endl;
                 std::cout << "sibt" << sibt << std::endl;
-                if (fSib == 0.0) {
-                    fTai[1] = 0.;
+                if (sib == 0.0) {
+                    tai[1] = 0.;
                     continue;
                 }
             }
-            qqt(fTai[_tail.ita]);
-            std::cout << "tai[" << _tail.ita
-                      << "]\t"  << fTai[_tail.ita] << std::endl;
+            qqt(tai[ita]);
+            std::cout << "tai[" << ita
+                      << "]\t"  << tai[ita] << std::endl;
         }
-         fDeltaInf = 0.;
-         Double_t extai1 = TMath::Exp(kAlpha / kPi * fDeltaInf);
-         fSig = fSib * extai1 * (1. + kAlpha / kPi * (fDelta - fDeltaInf)) +
-                    fTai[1] + fTai[2];
+         del_inf = 0.;
+         Double_t extai1 = TMath::Exp(kAlpha / kPi * del_inf);
+         sig = sib * extai1 * (1. + kAlpha / kPi * (delta - del_inf)) +
+                    tai[1] + tai[2];
     }
-
 }
 
 
 
-void TRadCor::Deltas(const Double_t massLepton2)
+void TRadCor::Deltas(void)
 {
-    Double_t sum = VacPol();
-
-    Double_t xxh = _Sxy.s - _Sxy.y - _phi.vv10;
-    Double_t ssh = _Sxy.x + _Sxy.y - _phi.vv20;
+    Double_t delta_vac = VacPol();
+    Double_t S_ = S - Q2 - V_1;
+    Double_t X_ = X + Q2 - V_2;
 
 #ifdef DEBUG
     std::cout.setf(std::ios::fixed);
-    std::cout << "sum    " << std::setw(20) << std::setprecision(10) << sum  << std::endl;
-    std::cout << "xxh    " << std::setw(20) << std::setprecision(10) << xxh  << std::endl;
-    std::cout << "ssh    " << std::setw(20) << std::setprecision(10) << ssh  << std::endl;
+    std::cout << "d_vac  " << std::setw(20) << std::setprecision(10) << delta_vac << std::endl;
+    std::cout << "S'     " << std::setw(20) << std::setprecision(10) << S_  << std::endl;
+    std::cout << "X'     " << std::setw(20) << std::setprecision(10) << X_  << std::endl;
 #endif
 
-    Double_t alss = TMath::Power(ssh, 2) - 2. * _phi.p22 * (2. * massLepton2);
-    Double_t alxx = TMath::Power(xxh, 2) - 2. * _phi.p22 * (2. * massLepton2);
+    Double_t lambda_s_ = TMath::Power(S_, 2) - 4. * px2 * m * m;
+    Double_t lambda_x_ = TMath::Power(X_, 2) - 4. * px2 * m * m;
+    if (lambda_s_ < 0.)
+        std::cout << "deltas: lambda_s' < 0 " << lambda_s_ << std::endl;
+    if (lambda_x_ < 0.)
+        std::cout << "deltas: lambda_x' < 0 " << lambda_x_ << std::endl;
 
-    if (alss < 0.) std::cout << "deltas: alss < 0 " << alss << std::endl;
-    if (alxx < 0.) std::cout << "deltas: alxx < 0 " << alxx << std::endl;
+    Double_t l_m = TMath::Log(Q2 / (m * m));
+    Double_t Li_2 = HapradUtils::fspen(1. - px2 * Q2 / (S_ * X_));
+    Double_t delta_VR = 1.5 * l_m - 2. -
+            0.5 * TMath::Power(TMath::Log(X_ / S_),2) + Li_2 - kPi * kPi / 6.;
 
-//    Double_t sqlss = TMath::Sqrt(TMath::Max(0., alss));
-//    Double_t sqlxx = TMath::Sqrt(TMath::Max(0., alxx));
-
-//    Double_t allss = TMath::Log((sqlss + ssh) / (-sqlss + ssh)) / sqlss ;
-//    Double_t allxx = TMath::Log((sqlxx + xxh) / (-sqlxx + xxh)) / sqlxx ;
-
-    Double_t dlm = TMath::Log(_Sxy.y / massLepton2);
-
-//    Double_t sfpr = dlm * dlm / 2. - dlm * TMath::Log(ssh * xxh / massLepton2 / _phi.p22) -
-//                    TMath::Power((TMath::Log(ssh / xxh)), 2) / 2. +
-//                    HapradUtils::fspen(1 - _phi.p22 * _Sxy.y / ssh / xxh) - kPi * kPi / 3.;
-
-    fDeltaInf = (dlm - 1.) * TMath::Log(TMath::Power(_phi.p22 - kMassC2, 2) / ssh / xxh);
-    fDelta    = fDeltaInf + sum +
-                (1.5 * dlm - 2. - 0.5 * TMath::Power(TMath::Log(xxh / ssh),2) +
-                        HapradUtils::fspen(1. - _phi.p22 * _Sxy.y / ssh / xxh) - kPi * kPi / 6.);
+    del_inf = (l_m - 1.) * TMath::Log(TMath::Power(px2 - kMassC2, 2) / S_ / X_);
+    delta   = del_inf + delta_vac + delta_VR;
 }
 
 
@@ -581,20 +535,20 @@ Double_t TRadCor::VacPol(void)
     Double_t suml = 0;
     for (Int_t i = 0; i < 3; ++i) {
         Double_t a2    = 2. * leptonMass[i];
-        Double_t sqlmi = TMath::Sqrt(_Sxy.y * _Sxy.y + 2. * a2 * _Sxy.y);
-        Double_t allmi = TMath::Log((sqlmi + _Sxy.y) / (sqlmi - _Sxy.y)) / sqlmi;
+        Double_t sqlmi = TMath::Sqrt(Q2 * Q2 + 2. * a2 * Q2);
+        Double_t allmi = TMath::Log((sqlmi + Q2) / (sqlmi - Q2)) / sqlmi;
 
-        suml = suml + 2. * (_Sxy.y + a2) * allmi / 3. - 10. / 9. +
-                    4. * a2 * (1. - a2 * allmi) / 3. / _Sxy.y;
+        suml = suml + 2. * (Q2 + a2) * allmi / 3. - 10. / 9. +
+                    4. * a2 * (1. - a2 * allmi) / 3. / Q2;
     }
 
     Double_t a, b, c;
 
-    if (_Sxy.y < 1) {
+    if (Q2 < 1) {
         a = -1.345 * TMath::Power(10,-9);
         b = -2.302 * TMath::Power(10,-3);
         c = 4.091;
-    } else if (_Sxy.y < 64) {
+    } else if (Q2 < 64) {
         a = -1.512 * TMath::Power(10,-3);
         b = -2.822 * TMath::Power(10,-3);
         c =  1.218;
@@ -605,7 +559,7 @@ Double_t TRadCor::VacPol(void)
     }
 
     Double_t sumh;
-    sumh = - (a + b * TMath::Log(1. + c * _Sxy.y)) * 2. * kPi / kAlpha;
+    sumh = - (a + b * TMath::Log(1. + c * Q2)) * 2. * kPi / kAlpha;
 
 #ifdef DEBUG
     std::cout << std::endl;
