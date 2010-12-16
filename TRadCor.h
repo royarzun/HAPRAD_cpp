@@ -54,18 +54,18 @@ struct Tail {
 class TRadCor {
 public:
     TRadCor();
-    TRadCor(Double_t Ebeam, Double_t x, Double_t q2, Double_t z,
+    TRadCor(Double_t Ebeam, Double_t x, Double_t Q2, Double_t z,
             Double_t pt, Double_t phi, Double_t maxMx2);
     ~TRadCor();
 
     Double_t GetRCFactor(void);
-    Double_t GetRCFactor(Double_t Ebeam, Double_t x, Double_t q2, Double_t z,
+    Double_t GetRCFactor(Double_t Ebeam, Double_t x, Double_t Q2, Double_t z,
                          Double_t pt, Double_t phi, Double_t maxMx2);
 
-    void SetParameters(Double_t Ebeam, Double_t x, Double_t q2, Double_t z,
+    void SetParameters(Double_t Ebeam, Double_t x, Double_t Q2, Double_t z,
                        Double_t pt, Double_t phi, Double_t maxMx2);
     void SetX(Double_t x);
-    void SetQ2(Double_t q2);
+    void SetQ2(Double_t Q2);
     void SetZ(Double_t z);
     void SetPt(Double_t pt);
     void SetPhi(Double_t phi);
