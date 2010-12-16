@@ -400,6 +400,7 @@ void TRadCor::Conkin()
     _Sxy.ym  = _Sxy.y + 2 * ml2;
     _Sxy.w2  = mp2 + _Sxy.s - _Sxy.y - _Sxy.x;
     _Sxy.als = _Sxy.s * _Sxy.s - 2 * ml2 * (2 * mp2);
+    _Sxy.alx = _Sxy.x * _Sxy.x - 2 * ml2 * (2 * mp2);
     _Sxy.alm = _Sxy.y * _Sxy.y + 4 * ml2 * _Sxy.y;
     _Sxy.aly = TMath::Power(_Sxy.sx, 2) + 4 * mp2 * _Sxy.y;
 
