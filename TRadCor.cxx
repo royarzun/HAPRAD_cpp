@@ -476,8 +476,8 @@ void TRadCor::SPhiH(void)
         sints = 2. * kMassProton * TMath::Sqrt(lambda) / _Sxy.sqls / _Sxy.sqly;
         sintx = 2. * kMassProton * TMath::Sqrt(lambda) / _Sxy.sqlx / _Sxy.sqly;
     } else {
-        std::cout << "sphi: sints = NaN " << sints << std::endl;
-        std::cout << "sphi: sintx = NaN " << sintx << std::endl;
+        std::cout << "sphi: sints = NaN " << lambda << std::endl;
+        std::cout << "sphi: sintx = NaN " << lambda << std::endl;
         sints = 0.;
         sintx = 0.;
     }
