@@ -498,7 +498,7 @@ void TRadCor::SPhiH(void)
     Deltas(ml2);
 
     Double_t sibt;
-    Double_t it_end = 3;
+    Int_t it_end = 3;
 
     if (_tail.ipol == 0) {
         it_end = 1;
