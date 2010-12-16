@@ -584,8 +584,8 @@ Double_t TRadCor::VacPol(void)
         Double_t sqlmi = TMath::Sqrt(_Sxy.y * _Sxy.y + 2 * a2 * _Sxy.y);
         Double_t allmi = TMath::Log((sqlmi + _Sxy.y) / (sqlmi - _Sxy.y)) / sqlmi;
 
-        suml =  suml + 2 * (_Sxy.y + a2) * allmi / 3 - 10 / 9 +
-                    4 * a2 * (1 - a2 * allmi) / 3 / _Sxy.y;
+        suml = suml + 2. * (_Sxy.y + a2) * allmi / 3. - 10. / 9. +
+                    4. * a2 * (1. - a2 * allmi) / 3. / _Sxy.y;
     }
 
     Double_t a, b, c;
