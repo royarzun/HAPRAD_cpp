@@ -333,7 +333,7 @@ void TRadCor::Haprad(void)
                _phi.plh = TMath::Sign(1., _phi.plh) * _phi.pph;
             }
         }
-        _phi.pth = TMath::Sqrt(_phi.pph * _phi.pph - _phi.pph * _phi.pph);
+        _phi.pth = TMath::Sqrt(_phi.pph * _phi.pph - _phi.plh * _phi.plh);
     }
 
 #ifdef DEBUG
