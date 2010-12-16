@@ -2,6 +2,7 @@
 #include "THapradUtils.h"
 #include "haprad_constants.h"
 #include <iostream>
+#include <iomanip>
 
 
 TRadCor::TRadCor()
@@ -231,6 +232,13 @@ void TRadCor::Haprad(void)
         _Sxy.ys = _Sxy.y / (_Sxy.s * _Sxy.xs);
     }
 
+#ifdef DEBUG
+    std::cout.setf(std::ios::fixed);
+    std::cout << "S      " << std::setw(20) << std::setprecision(10) << _Sxy.s  << std::endl;
+    std::cout << "y      " << std::setw(20) << std::setprecision(10) << _Sxy.ys << std::endl;
+    std::cout << "Q^2    " << std::setw(20) << std::setprecision(10) << _Sxy.y  << std::endl;
+#endif
+
     Double_t mp2 = TMath::Power(kMassProton, 2);
     Double_t yma = 1. / (1. + mp2 * _Sxy.xs / _Sxy.s);
     Double_t ymi = (kMassC2 - mp2) / (_Sxy.s * (1. - _Sxy.xs));
@@ -246,6 +254,9 @@ void TRadCor::Haprad(void)
     Conkin();
 
     _phi.ehad = _Sxy.anu * _phi.zdif;
+#ifdef DEBUG
+    std::cout << "Eh     " << std::setw(20) << std::setprecision(10) << _phi.ehad  << std::endl;
+#endif
     Double_t sqnuq = TMath::Sqrt(_Sxy.anu * _Sxy.anu + _Sxy.y);
 
     if (_phi.ehad < kMassDetectedHadron) {
@@ -257,7 +268,11 @@ void TRadCor::Haprad(void)
     }
 
     Double_t mhh2 = TMath::Power(kMassDetectedHadron,2);
+
     _phi.pph = TMath::Sqrt(_phi.ehad * _phi.ehad - mhh2);
+#ifdef DEBUG
+    std::cout << "Ph     " << std::setw(20) << std::setprecision(10) << _phi.pph  << std::endl;
+#endif
 
     if (_phi.tdif >= 0.) {
         _phi.pth = _phi.tdif;
@@ -321,6 +336,12 @@ void TRadCor::Haprad(void)
         _phi.pth = TMath::Sqrt(_phi.pph * _phi.pph - _phi.pph * _phi.pph);
     }
 
+#ifdef DEBUG
+    std::cout << "Pt     " << std::setw(20) << std::setprecision(10) << _phi.pth  << std::endl;
+    std::cout << "Pl     " << std::setw(20) << std::setprecision(10) << _phi.plh  << std::endl;
+    std::cout << "tdif   " << std::setw(20) << std::setprecision(10) << _phi.tdif << std::endl;
+#endif
+
     Double_t p22max = _Sxy.w2 - mhh2;
     _phi.p22 = mp2 + _Sxy.sx * (1. - _phi.zdif) + _phi.tdif;
 
@@ -382,6 +403,19 @@ void TRadCor::Conkin()
     _Sxy.alm = _Sxy.y * _Sxy.y + 4 * ml2 * _Sxy.y;
     _Sxy.aly = TMath::Power(_Sxy.sx, 2) + 4 * mp2 * _Sxy.y;
 
+#ifdef DEBUG
+    std::cout.setf(std::ios::fixed);
+    std::cout << "x      " << std::setw(20) << std::setprecision(10) << _Sxy.x   << std::endl;
+    std::cout << "sx     " << std::setw(20) << std::setprecision(10) << _Sxy.sx  << std::endl;
+    std::cout << "sxp    " << std::setw(20) << std::setprecision(10) << _Sxy.sxp << std::endl;
+    std::cout << "ym     " << std::setw(20) << std::setprecision(10) << _Sxy.ym  << std::endl;
+    std::cout << "w2     " << std::setw(20) << std::setprecision(10) << _Sxy.w2  << std::endl;
+    std::cout << "als    " << std::setw(20) << std::setprecision(10) << _Sxy.als << std::endl;
+    std::cout << "alx    " << std::setw(20) << std::setprecision(10) << _Sxy.alx << std::endl;
+    std::cout << "alm    " << std::setw(20) << std::setprecision(10) << _Sxy.alm << std::endl;
+    std::cout << "aly    " << std::setw(20) << std::setprecision(10) << _Sxy.aly << std::endl;
+#endif
+
     if (_Sxy.als < 0) std::cout << "Conkin: als < 0 " << std::endl;
     if (_Sxy.alx < 0) std::cout << "Conkin: alx < 0 " << std::endl;
     if (_Sxy.aly < 0) std::cout << "Conkin: aly < 0 " << std::endl;
@@ -397,6 +431,12 @@ void TRadCor::Conkin()
     _Sxy.anu  = _Sxy.sx / (2 * kMassProton);
     _Sxy.an   = kPi * kAlpha * kAlpha * _Sxy.ys * _Sxy.sx *
                                     kMassProton / 2 / _Sxy.sqly * kBarn;
+
+#ifdef DEBUG
+    std::cout << "allm   " << std::setw(20) << std::setprecision(10) << _Sxy.allm << std::endl;
+    std::cout << "anu    " << std::setw(20) << std::setprecision(10) << _Sxy.anu  << std::endl;
+    std::cout << "an     " << std::setw(20) << std::setprecision(10) << _Sxy.an   << std::endl;
+#endif
 
     _Sxy.tamax = (_Sxy.sx + _Sxy.sqly) / (2 * mp2);
     _Sxy.tamin = - _Sxy.y / mp2 / _Sxy.tamax;
@@ -448,6 +488,12 @@ void TRadCor::SPhiH(void)
     _phi.vv10 = (_Sxy.s * _phi.ehad - _Sxy.sqls * vv10) / kMassProton;
     _phi.vv20 = (_Sxy.x * _phi.ehad - _Sxy.sqlx * vv20) / kMassProton;
 
+#ifdef DEBUG
+    std::cout.setf(std::ios::fixed);
+    std::cout << "V1     " << std::setw(20) << std::setprecision(10) << _phi.vv10  << std::endl;
+    std::cout << "V2     " << std::setw(20) << std::setprecision(10) << _phi.vv20  << std::endl;
+#endif
+
     Deltas(ml2);
 
     Double_t sibt;
@@ -491,6 +537,13 @@ void TRadCor::Deltas(const Double_t massLepton2)
 
     Double_t xxh = _Sxy.s - _Sxy.y - _phi.vv10;
     Double_t ssh = _Sxy.x + _Sxy.y - _phi.vv20;
+
+#ifdef DEBUG
+    std::cout.setf(std::ios::fixed);
+    std::cout << "sum    " << std::setw(20) << std::setprecision(10) << sum  << std::endl;
+    std::cout << "xxh    " << std::setw(20) << std::setprecision(10) << xxh  << std::endl;
+    std::cout << "ssh    " << std::setw(20) << std::setprecision(10) << ssh  << std::endl;
+#endif
 
     Double_t alss = TMath::Power(ssh, 2) - 2. * _phi.p22 * (2 * massLepton2);
     Double_t alxx = TMath::Power(xxh, 2) - 2. * _phi.p22 * (2 * massLepton2);
@@ -552,6 +605,14 @@ Double_t TRadCor::VacPol(void)
 
     Double_t sumh;
     sumh = - (a + b * TMath::Log(1. + c * _Sxy.y)) * 2 * kPi / kAlpha;
+
+#ifdef DEBUG
+    std::cout << std::endl;
+    std::cout.setf(std::ios::fixed);
+    std::cout << "suml   " << std::setw(20) << std::setprecision(10) << suml  << std::endl;
+    std::cout << "sumh   " << std::setw(20) << std::setprecision(10) << sumh  << std::endl;
+    std::cout << std::endl;
+#endif
 
     return suml + sumh;
 }

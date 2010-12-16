@@ -47,7 +47,7 @@ endif
 
 ifeq ($(findstring Linux,$(OS_NAME)),Linux)
 CXX       := g++
-CXXFLAGS  += -Wall -fPIC $(ROOTCFLAGS)
+CXXFLAGS  += -Wall -fPIC $(ROOTCFLAGS) $(SET_DEBUG)
 endif
 
 LD        = g++
@@ -77,6 +77,10 @@ SH_LIB     := libTRadCor.so
 ##############################################################################
 
 all: $(FEXE) lib
+
+debug: lib
+
+debug: SET_DEBUG=-DDEBUG
 
 ##############################################################################
 
