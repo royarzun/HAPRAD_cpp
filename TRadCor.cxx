@@ -222,10 +222,6 @@ Double_t TRadCor::GetRCFactor(Double_t E, Double_t x, Double_t Q2, Double_t z,
 
 void TRadCor::Haprad(void)
 {
-    isf1 = 1;
-    isf2 = 4;
-    isf3 = 1;
-
     pl = 0.;
 
     S = 2. * M * E;
@@ -576,33 +572,33 @@ Double_t TRadCor::VacPol(void)
 
 Double_t TRadCor::Bornin(void)
 {
-    Double_t sfm[8];
-    Double_t tm[isf2];
+    Double_t H[4];
+    Double_t thetaB[4];
 
-    strf(0., 0., 0, sfm);
+    strf(0.,0.,0,H);
 
-    tm[0] = Q2;
-    tm[1] = (S * X - M * M * Q2) / 2.;
-    tm[2] = (V_1 * V_2 - m_h * m_h * Q2) / 2.;
-    tm[3] = (S * V_2 + X * V_1 - z * S_x * Q2) / 2.;
+    thetaB[0] = Q2;
+    thetaB[1] = (S * X - M * M * Q2) / 2.;
+    thetaB[2] = (V_1 * V_2 - m_h * m_h * Q2) / 2.;
+    thetaB[3] = (V_2 * S + V_1 * X - z * Q2 * S_x) / 2.;
 
 #ifdef DEBUG
         std::cout << "    BORNIN      " << std::endl;
 #endif
 
-    Double_t ssum = 0.;
-    for (Int_t i = isf1; i <= isf2; i += isf3) {
-        ssum = ssum + tm[i] * sfm[i];
+    Double_t sum = 0.;
+    for (Int_t i = 0; i < 4; ++i) {
+        sum = sum + thetaB[i] * H[i];
 #ifdef DEBUG
         std::cout.setf(std::ios::fixed);
-        std::cout << "    i      " << std::setw(20) << std::setprecision(10) << i      << std::endl;
-        std::cout << "    tm[i]  " << std::setw(20) << std::setprecision(10) << tm[i]  << std::endl;
-        std::cout << "    sfm[i] " << std::setw(20) << std::setprecision(10) << sfm[i] << std::endl;
-        std::cout << "    ssum   " << std::setw(20) << std::setprecision(10) << ssum   << std::endl;
+        std::cout << "    i         " << std::setw(20) << std::setprecision(10) << i         << std::endl;
+        std::cout << "    theta^B_i " << std::setw(20) << std::setprecision(10) << thetaB[i] << std::endl;
+        std::cout << "    H[i]      " << std::setw(20) << std::setprecision(10) << H[i]      << std::endl;
+        std::cout << "    sum       " << std::setw(20) << std::setprecision(10) << sum       << std::endl;
 #endif
     }
 
-    return ssum * N / Q2 / Q2 * 2.;
+    return sum * N / Q2 / Q2 * 2.;
 }
 
 

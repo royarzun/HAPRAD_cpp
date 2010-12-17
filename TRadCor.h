@@ -100,9 +100,6 @@ private:
     Double_t     N;                // Normalization factor
     Double_t     pl;
     Int_t        ita;
-    Int_t        isf1;
-    Int_t        isf2;
-    Int_t        isf3;
     Double_t     tau_max;
     Double_t     tau_min;
     Double_t     phi_rad;
