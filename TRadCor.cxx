@@ -8,7 +8,7 @@
 TRadCor::TRadCor()
 : E(0), maxMx2(0.), Mx2(0.),
   x(0.), y_i(0.), z(0.), t_i(0.), phi(0.),
-  sib(0.), sig(0.), delta(0.), tail(0.),
+  sigma_born(0.), sig_obs(0.), delta(0.), tail(0.),
   M(kMassProton), m(kMassElectron), m_h(kMassDetectedHadron),
   eps_phir(0.01), eps_tau(0.001), eps_rr(0.001),
   polType(0), int_phi_rad(0), int_phi_had(0)
@@ -22,7 +22,7 @@ TRadCor::TRadCor(Double_t E, Double_t x, Double_t Q2, Double_t z,
                  Double_t p_t, Double_t phi, Double_t maxMx2)
 : E(0), maxMx2(0.), Mx2(0.),
   x(0.), y_i(0.), z(0.), t_i(0.), phi(0.),
-  sib(0.), sig(0.), delta(0.), tail(0.),
+  sigma_born(0.), sig_obs(0.), delta(0.), tail(0.),
   M(kMassProton), m(kMassElectron), m_h(kMassDetectedHadron),
   eps_phir(0.01), eps_tau(0.001), eps_rr(0.001),
   polType(0), int_phi_rad(0), int_phi_had(0)
@@ -195,7 +195,7 @@ Double_t TRadCor::GetRCFactor(void)
 
     if (Mx2 > maxMx2) {
         Haprad();
-        rc = sig / sib;
+        rc = sig_obs / sigma_born;
     } else {
         rc = 0;
     }
@@ -472,11 +472,11 @@ void TRadCor::SPhiH(void)
             std::cout << "********** ita: " << ita
                       << " *********" << std::endl;
             if (ita == 1) {
-                sib = Bornin();
+                sigma_born = Bornin();
                 BorninTest(sibt);
-                std::cout << "sib1" << sib << std::endl;
+                std::cout << "sib1" << sigma_born << std::endl;
                 std::cout << "sibt" << sibt << std::endl;
-                if (sib == 0.0) {
+                if (sigma_born == 0.0) {
                     tai[1] = 0.;
                     continue;
                 }
@@ -487,8 +487,9 @@ void TRadCor::SPhiH(void)
         }
          del_inf = 0.;
          Double_t extai1 = TMath::Exp(kAlpha / kPi * del_inf);
-         sig = sib * extai1 * (1. + kAlpha / kPi * (delta - del_inf)) +
-                    tai[1] + tai[2];
+         sig_obs = sigma_born * extai1 *
+                    (1. + kAlpha / kPi * (delta - del_inf)) +
+                            tai[1] + tai[2];
     }
 }
 
@@ -606,7 +607,7 @@ Double_t TRadCor::Bornin(void)
 
 
 
-void TRadCor::BorninTest(Double_t& sib)
+void TRadCor::BorninTest(Double_t& sigma_born)
 {
 
 }

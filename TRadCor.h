@@ -38,7 +38,7 @@ private:
     void        Deltas(void);
     Double_t    VacPol(void);
     Double_t    Bornin(void);
-    void        BorninTest(Double_t& sib);
+    void        BorninTest(Double_t& sigma_born);
     void        qqt(Double_t& tai);
     void        strf(Double_t ta, Double_t d2kvir, Double_t rr, Double_t (&sfm)[8]);
 
@@ -59,8 +59,8 @@ private:
 
     // Results
     Double_t     rc;
-    Double_t     sib;           // sigma_0
-    Double_t     sig;           // sigma_{obs}
+    Double_t     sigma_born;    // sigma_0
+    Double_t     sig_obs;       // sigma_{obs}
     Double_t     del_inf;
     Double_t     delta;
     Double_t     tail;
