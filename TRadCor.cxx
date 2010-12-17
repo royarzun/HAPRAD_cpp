@@ -226,7 +226,6 @@ void TRadCor::Haprad(void)
     isf2 = 4;
     isf3 = 1;
 
-    un = 1.;
     pl = 0.;
 
     S = 2. * M * E;
@@ -473,7 +472,7 @@ void TRadCor::SPhiH(void)
             std::cout << "********** ita: " << ita
                       << " *********" << std::endl;
             if (ita == 1) {
-                Bornin();
+                sib = Bornin();
                 BorninTest(sibt);
                 std::cout << "sib1" << sib << std::endl;
                 std::cout << "sibt" << sibt << std::endl;
@@ -574,9 +573,35 @@ Double_t TRadCor::VacPol(void)
 
 
 
-void TRadCor::Bornin(void)
+Double_t TRadCor::Bornin(void)
 {
+    Double_t sfm[8];
+    Double_t tm[isf2];
 
+    strf(0., 0., 0, sfm);
+
+    tm[0] = Q2;
+    tm[1] = (S * X - M * M * Q2) / 2.;
+    tm[2] = (V_1 * V_2 - m_h * m_h * Q2) / 2.;
+    tm[3] = (S * V_2 + X * V_1 - z * S_x * Q2) / 2.;
+
+#ifdef DEBUG
+        std::cout << "    BORNIN      " << std::endl;
+#endif
+
+    Double_t ssum = 0.;
+    for (Int_t i = isf1; i <= isf2; i += isf3) {
+        ssum = ssum + tm[i] * sfm[i];
+#ifdef DEBUG
+        std::cout.setf(std::ios::fixed);
+        std::cout << "    i      " << std::setw(20) << std::setprecision(10) << i      << std::endl;
+        std::cout << "    tm[i]  " << std::setw(20) << std::setprecision(10) << tm[i]  << std::endl;
+        std::cout << "    sfm[i] " << std::setw(20) << std::setprecision(10) << sfm[i] << std::endl;
+        std::cout << "    ssum   " << std::setw(20) << std::setprecision(10) << ssum   << std::endl;
+#endif
+    }
+
+    return ssum * N / Q2 / Q2 * 2.;
 }
 
 
@@ -591,4 +616,10 @@ void TRadCor::BorninTest(Double_t& sib)
 void TRadCor::qqt(Double_t& tai)
 {
 
+}
+
+
+
+void TRadCor::strf(Double_t tau, Double_t d2kvir, Double_t R, Double_t (&sfm)[8])
+{
 }

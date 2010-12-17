@@ -37,9 +37,10 @@ private:
     void        SPhiH(void);
     void        Deltas(void);
     Double_t    VacPol(void);
-    void        Bornin(void);
+    Double_t    Bornin(void);
     void        BorninTest(Double_t& sib);
     void        qqt(Double_t& tai);
+    void        strf(Double_t ta, Double_t d2kvir, Double_t rr, Double_t (&sfm)[8]);
 
 
     Double_t     E;        // The beam energy
@@ -58,8 +59,8 @@ private:
 
     // Results
     Double_t     rc;
-    Double_t     sib;
-    Double_t     sig;
+    Double_t     sib;           // sigma_0
+    Double_t     sig;           // sigma_{obs}
     Double_t     del_inf;
     Double_t     delta;
     Double_t     tail;
@@ -97,7 +98,6 @@ private:
 
     // Integration
     Double_t     N;                // Normalization factor
-    Double_t     un;
     Double_t     pl;
     Int_t        ita;
     Int_t        isf1;
