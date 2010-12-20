@@ -41,6 +41,9 @@ private:
     void        BorninTest(Double_t& sigma_born);
     void        qqt(Double_t& tai);
     Double_t    qqtphi(Double_t phi);
+    Double_t    rv2ln(Double_t tauln);
+    Double_t    podinl(Double_t R);
+    Double_t    tails(Double_t tau, Double_t (&theta)[4][3], Double_t mu);
     void        strf(Double_t tau, Double_t mu, Double_t R, Double_t (&sfm)[4]);
 
 

@@ -719,6 +719,45 @@ Double_t TRadCor::qqtphi(Double_t phi)
 
 
 
+Double_t TRadCor::rv2ln(Double_t tauln)
+{
+    Double_t tau, mu, factor;
+    Double_t tm[4][3];
+    tau = TMath::Exp(tauln) - Q2 / S_x;
+
+    Double_t sqrt_lq = TMath::Sqrt(TMath::Max(0., lambda_q));
+    Double_t costk, sintk;
+    costk = (S_x - M * M * tau) / sqrt_lq;
+
+    if (abs(costk) <= 1) {
+        sintk = TMath::Sqrt(1. - costk * costk);
+    } else {
+        std::cout << "     rv2ln: costk > 1 " << costk << std::endl;
+        sintk = 0;
+    }
+
+    mu = (E_h - p_l * costk - p_h * sintk * TMath::Cos(phi_rad - phi)) / M;
+    factor = 1. + tau - mu;
+
+    tails(tau, tm, mu);
+
+    Double_t sfm[4];
+    Double_t res = 0;
+
+    if (ita == 1) {
+        strf(0, 0, 0, sfm);
+//        Double_t rmin = TMath::Power(10, -8);
+//        Double_t rmax = (px2 - kMassC2) / factor;
+//        simpux(rmin, rmax, 100, epsrr, podinl, res);
+    } else if (ita == 2) {
+        res = podinl((px2 - M * M) / factor) / factor;
+    }
+
+    return res * (Q2 / S_x + tau);
+}
+
+
+
 void TRadCor::strf(Double_t tau, Double_t mu, Double_t R, Double_t (&sfm)[4])
 {
 // The function calculates deep inelastic (ita = 1), elastic (ita = 2),
