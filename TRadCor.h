@@ -40,7 +40,7 @@ private:
     Double_t    Bornin(void);
     void        BorninTest(Double_t& sigma_born);
     void        qqt(Double_t& tai);
-    void        strf(Double_t ta, Double_t d2kvir, Double_t rr, Double_t (&sfm)[8]);
+    void        strf(Double_t tau, Double_t mu, Double_t R, Double_t (&sfm)[4]);
 
 
     Double_t     E;        // The beam energy

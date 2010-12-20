@@ -617,6 +617,101 @@ void TRadCor::qqt(Double_t& tai)
 
 
 
-void TRadCor::strf(Double_t tau, Double_t d2kvir, Double_t R, Double_t (&sfm)[8])
+void TRadCor::strf(Double_t tau, Double_t mu, Double_t R, Double_t (&sfm)[4])
 {
+// The function calculates deep inelastic (ita = 1), elastic (ita = 2),
+// quasielastic (ita = 3) structure functions in kinematical point (tau,R).
+//
+//     R = S_x - tt
+//     tau = (t - Q2) / R
+//
+// where
+//
+//     tt = t + mf2 - M^2
+//
+// mf2 is invarint mass of final hadrons
+
+    for (Int_t i = 0 ; i < 4 ; ++i) {
+        sfm[i] = 0;
+    }
+
+    Double_t _Q2  = Q2 + R * tau;
+    Double_t _t   = t - R * (tau - mu);
+    Double_t _lq  = (S_x - R) * (S_x - R) + 4. * M * M * _Q2;
+    Double_t _px2 = px2 - R * (1. + tau - mu);
+    Double_t phq  = (m_h * m_h - _Q2 - _t) / 2.;
+
+    Double_t _nu  = (S_x - R) / (2 * M);
+    Double_t aks  = _Q2 / (2 * M) / _nu;
+    Double_t zh   = E_h / _nu;
+    Double_t _sq  = TMath::Sqrt(_Q2 + TMath::Power(_nu, 2));
+    Double_t _p_l = (E_h * _nu - phq) / _sq;
+    Double_t _pt2 = TMath::Power(p_h, 2) - TMath::Power(_p_l, 2);
+
+    const Double_t& e = kEpsMachine;
+
+    Double_t eps_nu = TMath::Sqrt(
+                TMath::Power(S_x * e / (2 * M), 2) +
+                TMath::Power(R * e / (2 * M), 2) +
+                TMath::Power((S_x - R) / (2 * M) * e, 2));
+
+    Double_t epst = TMath::Sqrt(
+                TMath::Power((t * e), 2) +
+                TMath::Power(((tau - mu) * R * e), 2) +
+                TMath::Power((R * tau * e), 2) +
+                TMath::Power((R * mu * e), 2));
+
+    Double_t epsphq = TMath::Sqrt(
+                TMath::Power((2 * m_h * m_h * e), 2) +
+                TMath::Power((_Q2 * e), 2) +
+                TMath::Power(epst, 2)
+                ) / 2;
+
+    Double_t epsq = 1. / 2. / TMath::Sqrt(_Q2 + _nu * _nu) *
+                TMath::Sqrt(TMath::Power((_Q2 * e), 2) +
+                        TMath::Power(2 * _nu * _nu * eps_nu, 2));
+
+    Double_t epspl = TMath::Sqrt(
+                TMath::Power(E_h * e * _nu / _sq, 2) +
+                TMath::Power(E_h * eps_nu / _sq, 2) +
+                TMath::Power(epsphq / _sq, 2) +
+                    TMath::Power((E_h * _nu - phq) /
+                        TMath::Power(_sq, 2) * epsq, 2));
+
+    Double_t epspt2 = 2. * TMath::Sqrt(
+                TMath::Power(p_h, 4) * TMath::Power(e, 2) +
+                TMath::Power(_p_l, 4) * TMath::Power(epspl, 2));
+
+    if (_pt2 < 0 && (_pt2 * _pt2 - epspt2 * epspt2) > 0) return;
+
+
+    Double_t a = S / (2 * M) * (S / (2 * M) - nu) * _Q2 / Q2;
+    Double_t tlde = (_nu + TMath::Sqrt(TMath::Power(_nu, 2) + 4 * a)) / 2;
+    Double_t tldy = _nu / tlde;
+
+    Double_t H1z, H2z, H3z, H4z;
+
+    HapradUtils::SemiInclusiveModel(_Q2, aks, tldy, zh, _pt2, _px2,
+                                    _p_l, H1z, H2z, H3z, H4z);
+
+    // Including kinematic shift due to photon emission
+    Double_t _sqrt_lq = TMath::Sqrt(_lq);
+
+    Double_t aa = (S_x - R) * (zh - 2 * M * _p_l / _sqrt_lq) / 2. / (M * M);
+
+    Double_t h1 = zh * (2. * _Q2 * aks * H1z - _pt2 * H4z) /
+                M / _Q2 / aks;
+
+    Double_t h2 = 2 * zh * (2 * aks * (aks * H2z + aa * H3z) * _lq +
+            H4z * (aa * aa * _lq - 2 * _pt2 * _Q2)) /
+                    M / aks / _Q2 / _lq;
+
+    Double_t h3 = 2 * H4z * zh / M / _Q2 / aks;
+
+    Double_t h4 = -2 * zh * (aks * H3z + aa * H4z) / M / _Q2 / aks;
+
+    sfm[0] = h1;
+    sfm[1] = h2;
+    sfm[2] = h3;
+    sfm[3] = h4;
 }
