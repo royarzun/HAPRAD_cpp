@@ -612,7 +612,79 @@ void TRadCor::BorninTest(Double_t& sigma_born)
 
 void TRadCor::qqt(Double_t& tai)
 {
+    Double_t sqrt_lq = TMath::Sqrt(TMath::Max(0., lambda_q));
 
+    if (ita == 1) {
+        if (int_phi_rad == 1) {
+            // Integration using Simpson's rule
+//            simpsx(0, (2. * pi), 150, epsphir, qqtphi, tai);
+            tai = N * kAlpha * tai / (kPi * kPi) / 4. / sqrt_lq;
+        } else if (int_phi_rad == 0) {
+            tai = N * kAlpha / kPi * qqtphi(0) / 2 / sqrt_lq;
+        }
+    } else {
+        Double_t tau_1, tau_2;
+        Double_t tau[6];
+        Double_t phi[4];
+
+        tau_1 = - Q2 / S;
+        tau_2 =   Q2 / X;
+
+        phi[0] = 0.;
+        phi[1] = 0.01 * kPi;
+        phi[2] = 2. * kPi - 0.01 * kPi;
+        phi[3] = 2. * kPi;
+
+        tau[0] = tau_min;
+        tau[1] = tau_1 - 0.15 * (tau_1 - tau_min);
+        tau[2] = tau_1 + 0.15 * (tau_2 - tau_1);
+        tau[3] = tau_2 - 0.15 * (tau_2 - tau_1);
+        tau[4] = tau_2 + 0.15 * (tau_max - tau_2);
+        tau[5] = tau_max;
+
+        Int_t id = 1;
+        Double_t rere = 0.;
+
+        for (Int_t iph = 0; iph < 3; iph++) {
+            for (Int_t ico = 0; ico < 5; ico++) {
+                Double_t am[2], bm[2];
+
+                am[0] = tau[ico];
+                bm[0] = tau[ico+1];
+                am[1] = phi[iph];
+                bm[1] = phi[iph+1];
+
+                if (am[1] > bm[1])
+                    std::cout << am[1] << " < " << bm[1] << std::endl;
+                if (am[0] > bm[0])
+                    std::cout << am[0] << " < " << bm[1] << std::endl;
+
+                Double_t otr;
+//                Double_t ot = TMath::Power(10, -3);
+                Int_t mir = 10000;
+//                Int_t ma = 10 * mir;
+//                Double_t wrk[500];
+                Double_t re;
+//                Double_t re2;
+
+                // Integration using d01fce
+//              d01fce(2, am, bm, mir, ma, rv2tr, ot, otr, 500, wrk, re, id);
+                std::cout.setf(std::ios::fixed);
+                std::cout << " tai: "
+                          << std::setw(4)  << ico + 1
+                          << std::setw(4)  << iph + 1
+                          << std::setw(10) << std::setprecision(4) << re
+                          << std::setw(10) << std::setprecision(4) << otr
+                          << std::setw(10) << std::setprecision(4) << mir
+                          << std::setw(10) << std::setprecision(4) << id
+                          << std::endl;
+
+                rere = rere + re;
+            }
+        }
+
+        tai = - kAlpha / (64. * TMath::Power(kPi,5.) * sqrt_lq * M) * N * rere;
+    }
 }
 
 

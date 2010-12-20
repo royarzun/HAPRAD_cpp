@@ -40,6 +40,7 @@ private:
     Double_t    Bornin(void);
     void        BorninTest(Double_t& sigma_born);
     void        qqt(Double_t& tai);
+    Double_t    qqtphi(Double_t phi);
     void        strf(Double_t tau, Double_t mu, Double_t R, Double_t (&sfm)[4]);
 
 
