@@ -5,33 +5,6 @@ SHELL = /bin/bash
 .SECONDARY: $(DICT_CLASS)
 .PHONY: all lib clean distclean checkdirs
 
-##############################################################################
-# FORTRAN
-##############################################################################
-
-FEXE      := haprad20.exe
-FTEST     := test.exe
-
-INC      := $(wildcard include/*.inc)
-
-FOBJ      := rcdat.o fhaprad.o ihaprad.o haprad_utils.o exclusive_model.o  \
-	    h4.o h3.o pkhff.o init_pdf.o semi_inclusive_model.o
-
-OBJ_FTEST  := rcdat_test.o fhaprad_test.o ihaprad.o haprad_utils.o          \
-	    exclusive_model.o h4.o h3.o pkhff.o init_pdf.o                \
-	    semi_inclusive_model.o
-
-CERNLIBS  := -lpdflib804 -lmathlib -lphtools -lpacklib -lkernlib -lpawlib
-FLIBS      := $(CERNLIBS)
-
-FCC  := gfortran
-
-F77OPT    := -DLinux -fno-automatic -ffixed-line-length-none \
-             -fdollar-ok -fno-second-underscore -Iinclude
-
-##############################################################################
-# C++
-##############################################################################
 
 ROOTCONFIG  := root-config
 ROOTCFLAGS  := $(shell $(ROOTCONFIG) --cflags)
@@ -73,16 +46,13 @@ DICT_OBJ   := $(addprefix $(OBJ_DIR)/,$(SRC_CLASS:.cxx=Dict.o))
 SH_LIB     := libTRadCor.so
 
 ##############################################################################
-# Rules
-##############################################################################
 
-all: $(FEXE) lib
+all: lib
 
 debug: lib
 
 debug: SET_DEBUG=-DDEBUG
 
-##############################################################################
 
 lib: checkdirs $(SLIB_DIR)/$(SH_LIB)
 
@@ -121,24 +91,6 @@ checkdirs: $(SLIB_DIR) $(OBJ_DIR) $(DICT_DIR) $(DEP_DIR)
 $(SLIB_DIR) $(OBJ_DIR) $(DICT_DIR) $(DEP_DIR):
 	@mkdir -p $@
 
-##############################################################################
-
-$(FEXE): $(FOBJ) $(INC)
-	$(FCC) $(F77OPT) -o $(FEXE) $(FOBJ) $(FLIBS)
-
-test: $(FTEST)
-
-$(FTEST): $(OBJ_FTEST) $(INC)
-	$(FCC) $(F77OPT) -o $(FTEST) $(OBJ_FTEST) $(FLIBS)
-
-
-%.o: %.f $(INC)
-	$(FCC) $(F77OPT) -c $< -o $@
-
-##############################################################################
-
 clean:
-	@rm -f  *.o core
 	@rm -rf $(OBJ_DIR) $(DICT_DIR)
-	@rm -f $(FEXE) $(FTEST) res.dat test.dat
 	@rm -rf $(SLIB_DIR) $(DEP_DIR)
