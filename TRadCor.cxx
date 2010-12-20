@@ -493,6 +493,7 @@ void TRadCor::SPhiH(void)
 
 void TRadCor::Deltas(void)
 {
+/*
     Double_t delta_vac = VacPol();
     Double_t S_ = S - Q2 - V_1;
     Double_t X_ = X + Q2 - V_2;
@@ -518,12 +519,14 @@ void TRadCor::Deltas(void)
 
     del_inf = (l_m - 1.) * TMath::Log(TMath::Power(px2 - kMassC2, 2) / S_ / X_);
     delta   = del_inf + delta_vac + delta_VR;
+*/
 }
 
 
 
 Double_t TRadCor::VacPol(void)
 {
+/*
     Double_t leptonMass[3] = { 0.26110  * TMath::Power(10,-6),
                                0.111637 * TMath::Power(10,-1),
                                3.18301 };
@@ -566,12 +569,14 @@ Double_t TRadCor::VacPol(void)
 #endif
 
     return suml + sumh;
+*/
+    return 0;
 }
-
 
 
 Double_t TRadCor::Bornin(void)
 {
+    /*
     Double_t H[4];
     Double_t thetaB[4];
 
@@ -599,6 +604,8 @@ Double_t TRadCor::Bornin(void)
     }
 
     return sum * N / Q2 / Q2 * 2.;
+*/
+    return 0;
 }
 
 
@@ -612,6 +619,7 @@ void TRadCor::BorninTest(Double_t& sigma_born)
 
 void TRadCor::qqt(Double_t& tai)
 {
+    /*
     Double_t sqrt_lq = TMath::Sqrt(TMath::Max(0., lambda_q));
 
     if (ita == 1) {
@@ -685,12 +693,14 @@ void TRadCor::qqt(Double_t& tai)
 
         tai = - kAlpha / (64. * TMath::Power(kPi,5.) * sqrt_lq * M) * N * rere;
     }
+*/
 }
 
 
 
 Double_t TRadCor::qqtphi(Double_t phi)
 {
+/*
     phi_rad = phi;
 
     Double_t tau_1, tau_2;
@@ -715,12 +725,15 @@ Double_t TRadCor::qqtphi(Double_t phi)
         res = res + re;
     }
     return res;
+*/
+    return 0;
 }
 
 
 
 Double_t TRadCor::rv2ln(Double_t tauln)
 {
+    /*
     Double_t tau, mu, factor;
     Double_t tm[4][3];
     tau = TMath::Exp(tauln) - Q2 / S_x;
@@ -754,12 +767,15 @@ Double_t TRadCor::rv2ln(Double_t tauln)
     }
 
     return res * (Q2 / S_x + tau);
+*/
+    return 0;
 }
 
 
 
 void TRadCor::strf(Double_t tau, Double_t mu, Double_t R, Double_t (&sfm)[4])
 {
+    /*
 // The function calculates deep inelastic (ita = 1), elastic (ita = 2),
 // quasielastic (ita = 3) structure functions in kinematical point (tau,R).
 //
@@ -855,4 +871,5 @@ void TRadCor::strf(Double_t tau, Double_t mu, Double_t R, Double_t (&sfm)[4])
     sfm[1] = h2;
     sfm[2] = h3;
     sfm[3] = h4;
+*/
 }
