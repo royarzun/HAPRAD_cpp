@@ -689,6 +689,36 @@ void TRadCor::qqt(Double_t& tai)
 
 
 
+Double_t TRadCor::qqtphi(Double_t phi)
+{
+    phi_rad = phi;
+
+    Double_t tau_1, tau_2;
+    Double_t tau[6];
+
+    tau_1 = - Q2 / S;
+    tau_2 =   Q2 / X;
+
+    tau[0] = tau_min;
+    tau[1] = tau_1 - 0.15 * (tau_1 - tau_min);
+    tau[2] = tau_1 + 0.15 * (tau_2 - tau_1);
+    tau[3] = tau_2 - 0.15 * (tau_2 - tau_1);
+    tau[4] = tau_2 + 0.15 * (tau_max - tau_2);
+    tau[5] = tau_max;
+
+//    Double_t ep = TMath::Power(1, -12);
+    Double_t res = 0;
+
+    for (Int_t i = 0; i < 6; i++) {
+        Double_t re;
+//        simptx(TMath::Log(xs + tar[i]) + ep, TMath::Log(xs + tar[i+1]) - ep, 100, epstau, rv2ln, re));
+        res = res + re;
+    }
+    return res;
+}
+
+
+
 void TRadCor::strf(Double_t tau, Double_t mu, Double_t R, Double_t (&sfm)[4])
 {
 // The function calculates deep inelastic (ita = 1), elastic (ita = 2),
