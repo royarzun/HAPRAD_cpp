@@ -1,5 +1,6 @@
 #include "TLorentzInvariants.h"
 #include "TKinematicalVariables.h"
+#include "THapradException.h"
 #include "THadronKinematics.h"
 #include "TGlobalConfig.h"
 
@@ -63,11 +64,7 @@ void TLorentzInvariants::Evaluate(TKinematicalVariables& kin, Double_t E)
 
     if (kin.Y() > y_max || kin.Y() < y_min ||
             kin.X() > 1. || kin.X() < 0.) {
-        std::cout << " Warning! Wrong kinematics! Skip the point!"
-                  << std::endl
-                  << " y = " << kin.Y() << std::endl
-                  << " x = " << kin.X() << std::endl;
-        return;
+        throw TKinematicException();
     }
 
     fX  = fS * (1. - kin.Y());

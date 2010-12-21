@@ -1,5 +1,6 @@
 #include "THadronKinematics.h"
 #include "TKinematicalVariables.h"
+#include "THapradException.h"
 #include "TLorentzInvariants.h"
 #include "haprad_constants.h"
 #include <iostream>
@@ -35,13 +36,7 @@ void THadronKinematics::Evaluate(TKinematicalVariables& kin,
     std::cout << "Eh     " << std::setw(20) << std::setprecision(10) << fEh << std::endl;
 #endif
 
-    if (fEh < m_h) {
-        std::cout << " Warning! Wrong kinematics! Skip the point!"
-                  << std::endl
-                  << " E_h =" << fEh
-                  << std::endl;
-        return;
-    }
+    if (fEh < m_h) throw TKinematicException();
 
     fPh = Sqrt(fEh * fEh - m_h * m_h);
 #ifdef DEBUG
@@ -53,13 +48,7 @@ void THadronKinematics::Evaluate(TKinematicalVariables& kin,
     if (kin.T() >= 0.) {
         fPt = kin.T();
 
-        if (fPh < fPt) {
-            std::cout << " Warning! Wrong kinematics! Skip the point!"
-                      << std::endl
-                      << " p_h = " << fPh << std::endl
-                      << " p_t = " << fPt << std::endl;
-            return;
-        }
+        if (fPh < fPt) throw TKinematicException();
 
         fPl = Sqrt(fPh * fPh - fPt * fPt);
     } else {
@@ -79,11 +68,7 @@ void THadronKinematics::Evaluate(TKinematicalVariables& kin,
             Double_t epspl  = Sqrt(sum) / 2.;
             Double_t calEps = fPh - Abs(fPl);
             if (Abs(calEps) > epspl) {
-               std::cout << " Warning! Wrong kinematics! Skeep the point!"
-                         << std::endl << " p_h  = " << fPh
-                         << std::endl << " p_l  = " << fPl
-                         << "\t"      << calEps << std::endl;
-               return;
+                throw TKinematicException();
             } else {
                std::cout << "Zero p_t! " << fPl
                          << "\t"         << calEps
@@ -109,11 +94,5 @@ void THadronKinematics::EvaluatePx2(const TKinematicalVariables& kin,
     Double_t px2_max = inv.W2() - m_h * m_h;
     fPx2 = M * M + inv.Sx() * (1. - kin.Z()) + kin.T();
 
-    if (fPx2 < kMassC2 || fPx2 > px2_max) {
-        std::cout << " Warning! Wrong kinematics! Skeep the point!" << std::endl
-                  << " p_x^2     = " << fPx2 << std::endl
-                  << " mc2       = " << kMassC2 << std::endl
-                  << " p_x^2 max = " << px2_max << std::endl;
-        return;
-    }
+    if (fPx2 < kMassC2 || fPx2 > px2_max) throw TKinematicException();
 }

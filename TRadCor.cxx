@@ -1,5 +1,6 @@
 #include "TRadCor.h"
 #include "THapradUtils.h"
+#include "THapradException.h"
 #include "haprad_constants.h"
 #include <iostream>
 #include <iomanip>
@@ -208,8 +209,20 @@ void TRadCor::Haprad(void)
 {
     pl = 0.;
 
-    fInv.Evaluate(fKin, E);
-    fHadKin.Evaluate(fKin, fInv);
+    try {
+        fInv.Evaluate(fKin, E);
+    } catch (TKinematicException& wrongKin) {
+        std::cout << wrongKin.what() << std::endl;
+        return;
+    }
+
+    try {
+        fHadKin.Evaluate(fKin, fInv);
+    } catch (TKinematicException& wrongKin) {
+        std::cout << wrongKin.what() << std::endl;
+        return;
+    }
+
 
     N = kPi * TMath::Power(kAlpha,2) * fKin.Y() * fInv.Sx() * M / 2. / fInv.SqrtLq() * kBarn;
 #ifdef DEBUG
@@ -245,11 +258,15 @@ void TRadCor::Haprad(void)
     Double_t tdmax;
     tdmax = m_h * m_h - fInv.Q2() + 2. * (- fHadKin.SqNuQ() * fHadKin.Ph() - fHadKin.Nu() * fHadKin.Eh());
 
-    if ((fKin.T() - t_min) > kEpsMachine || fKin.T() < tdmax) {
-        std::cout << " Warning! Wrong kinematics! Skeep the point!" << std::endl
-                  << " t     = " << fKin.T() << std::endl
-                  << " t_max = " << tdmax << std::endl
-                  << " t_min = " << t_min << " - " << fKin.T() - t_min << std::endl;
+    try {
+        if ((fKin.T() - t_min) > kEpsMachine || fKin.T() < tdmax) {
+            throw TKinematicException();
+        }
+    } catch (TKinematicException& wrongKin) {
+        std::cout << wrongKin.what()
+                << " t     = " << fKin.T() << std::endl
+                << " t_max = " << tdmax << std::endl
+                << " t_min = " << t_min << " - " << fKin.T() - t_min << std::endl;
         return;
     }
 
