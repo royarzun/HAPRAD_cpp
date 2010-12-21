@@ -7,7 +7,6 @@
 
 TRadCor::TRadCor()
 : E(0), maxMx2(0.), Mx2(0.),
-  x(0.), y_i(0.), z(0.), t_i(0.), phi(0.),
   sigma_born(0.), sig_obs(0.), delta(0.), tail(0.),
   M(kMassProton), m(kMassElectron), m_h(kMassDetectedHadron),
   eps_phir(0.01), eps_tau(0.001), eps_rr(0.001)
@@ -19,8 +18,8 @@ TRadCor::TRadCor()
 
 TRadCor::TRadCor(Double_t E, Double_t x, Double_t Q2, Double_t z,
                  Double_t p_t, Double_t phi, Double_t maxMx2)
-: E(0), maxMx2(0.), Mx2(0.),
-  x(0.), y_i(0.), z(0.), t_i(0.), phi(0.),
+: fKin(x,-Q2,z,p_t,phi/kRadianDeg),
+  E(0), maxMx2(0.), Mx2(0.),
   sigma_born(0.), sig_obs(0.), delta(0.), tail(0.),
   M(kMassProton), m(kMassElectron), m_h(kMassDetectedHadron),
   eps_phir(0.01), eps_tau(0.001), eps_rr(0.001)
@@ -56,15 +55,9 @@ void TRadCor::SetParameters(Double_t E, Double_t x, Double_t Q2, Double_t z,
     // of missing mass.
 
     this->E   = E;
-
-    this->x   = x;
-    this->y_i = -Q2;
-    this->z   = z;
-    this->t_i = p_t;
-    this->phi = phi / kRadianDeg;
-
     this->maxMx2 = maxMx2;
 
+    fKin.SetAll(x,-Q2,z,p_t,phi/kRadianDeg);
     Setup();
 }
 
@@ -79,7 +72,7 @@ void TRadCor::SetEbeam(Double_t E)
 
 void TRadCor::SetX(Double_t x)
 {
-    this->x = x;
+    fKin.SetX(x);
     Setup();
 }
 
@@ -87,7 +80,7 @@ void TRadCor::SetX(Double_t x)
 
 void TRadCor::SetQ2(Double_t Q2)
 {
-    this->y_i = -Q2;
+    fKin.SetY(-Q2);
     Setup();
 }
 
@@ -95,7 +88,7 @@ void TRadCor::SetQ2(Double_t Q2)
 
 void TRadCor::SetZ(Double_t z)
 {
-    this->z = z;
+    fKin.SetZ(z);
     Setup();
 }
 
@@ -103,7 +96,7 @@ void TRadCor::SetZ(Double_t z)
 
 void TRadCor::SetPt(Double_t p_t)
 {
-    this->t_i = p_t;
+    fKin.SetT(p_t);
     Setup();
 }
 
@@ -111,7 +104,7 @@ void TRadCor::SetPt(Double_t p_t)
 
 void TRadCor::SetPhi(Double_t phi)
 {
-    this->phi = phi / kRadianDeg;
+    fKin.SetPhiH(phi/kRadianDeg);
 }
 
 
@@ -128,15 +121,6 @@ void TRadCor::RegisteredLepton(Int_t type)
     // Set the registere lepton: 1 -- electron; 2 -- muon.
     //
     // Default is 1.
-
-    switch(type) {
-        case 1:
-            m = kMassElectron;
-            break;
-        case 2:
-            m = kMassMuon;
-            break;
-    }
 
     fConfig.SetLepton(type);
 }
@@ -182,8 +166,8 @@ void TRadCor::Setup(void)
 {
     // Calculate the missing mass squared
 
-    Double_t S_x = - y_i / x;
-    Mx2 = M * M + S_x * (1.0 - z) + t_i;
+    Double_t S_x = - fKin.Y() / fKin.X();
+    Mx2 = M * M + S_x * (1.0 - fKin.Z()) + fKin.T();
 }
 
 
@@ -224,142 +208,48 @@ void TRadCor::Haprad(void)
 {
     pl = 0.;
 
-    S = 2. * M * E;
+    fInv.Evaluate(fKin, E);
+    fHadKin.Evaluate(fKin, fInv);
 
-    if (y_i >= 0.) {
-        y = y_i;
-        Q2 = S * x * y;
-    } else {
-        Q2 = - y_i;
-        y = Q2 / (S * x);
-    }
-
+    N = kPi * TMath::Power(kAlpha,2) * fKin.Y() * fInv.Sx() * M / 2. / fInv.SqrtLq() * kBarn;
 #ifdef DEBUG
-    std::cout.setf(std::ios::fixed);
-    std::cout << "S      " << std::setw(20) << std::setprecision(10) << S  << std::endl;
-    std::cout << "y      " << std::setw(20) << std::setprecision(10) << y << std::endl;
-    std::cout << "Q^2    " << std::setw(20) << std::setprecision(10) << Q2  << std::endl;
+    std::cout << "N      " << std::setw(20) << std::setprecision(10) << N << std::endl;
 #endif
 
-    Double_t y_max = 1. / (1. + M * M * x / S);
-    Double_t y_min = (kMassC2 - M * M) / (S * (1. - x));
-
-    if (y > y_max || y < y_min || x > 1. || x < 0.) {
-        std::cout << " Warning! Wrong kinematics! Skip the point!"
-                  << std::endl
-                  << " y = " << y << std::endl
-                  << " x = " << x << std::endl;
-        return;
-    }
-
-    Conkin();
-
-    E_h = nu * z;
-#ifdef DEBUG
-    std::cout << "Eh     " << std::setw(20) << std::setprecision(10) << E_h  << std::endl;
-#endif
-
-    Double_t sqnuq = TMath::Sqrt(nu * nu + Q2);
-
-    if (E_h < m_h) {
-        std::cout << " Warning! Wrong kinematics! Skip the point!"
-                  << std::endl
-                  << " E_h =" << E_h
-                  << std::endl;
-        return;
-    }
-
-    p_h = TMath::Sqrt(E_h * E_h - m_h * m_h);
-#ifdef DEBUG
-    std::cout << "Ph     " << std::setw(20) << std::setprecision(10) << p_h  << std::endl;
-#endif
-
-    t = t_i;
-
-    if (t >= 0.) {
-        p_t = t;
-
-        if (p_h < p_t) {
-            std::cout << " Warning! Wrong kinematics! Skip the point!"
-                      << std::endl
-                      << " p_h = " << p_h << std::endl
-                      << " p_t = " << p_t << std::endl;
-            return;
-        }
-
-        p_l = TMath::Sqrt(p_h * p_h - p_t * p_t);
-
-        if (p_h > p_t) {
-            Double_t sqrt_lq = TMath::Sqrt(TMath::Max(0., lambda_q));
-            N = N * sqrt_lq / 2. / M / p_l;
+    if (fKin.T() >= 0.) {
+        if (fHadKin.Ph() > fHadKin.Pt()) {
+            N = N * fInv.SqrtLq() / 2. / M / fHadKin.Pl();
         } else {
             N = 0.;
         }
 
-        t = m_h * m_h - Q2 + 2. * (sqnuq * p_l - nu * E_h);
+        Double_t t = m_h * m_h - fInv.Q2() + 2. * (fHadKin.SqNuQ() * fHadKin.Pl() - fHadKin.Nu() * fHadKin.Eh());
+        fKin.SetT(t);
 
-        std::cout << "p_l: " << p_l << "\t" << t << "\t"
-                  << p_l - t + Q2 - m_h * m_h + 2. * nu * E_h / 2. / sqnuq
+        std::cout << "p_l: " << fHadKin.Pl() << "\t" << t << "\t"
+                  << fHadKin.Pl() - t + fInv.Q2() - m_h * m_h + 2. * fHadKin.Nu() * fHadKin.Eh() / 2. / fHadKin.SqNuQ()
                   << std::endl;
-    } else {
-        p_l = (t + Q2 - m_h * m_h + 2. * nu * E_h) / 2. / sqnuq;
-
-        if (p_h < TMath::Abs(p_l)) {
-            Double_t eps1, eps2, eps3, eps4, eps5, sum;
-
-            eps1 = t * kEpsMachine / sqnuq;
-            eps2 = 2. * m_h * m_h  * kEpsMachine / sqnuq;
-            eps3 = 2. * nu * E_h * kEpsMachine / sqnuq;
-            eps4 = t + Q2 - m_h * m_h + 2. * nu * E_h;
-            eps5 = eps4 / sqnuq * kEpsMachine;
-
-            sum = eps1 * eps1 + eps2 * eps2 + 2. * eps3 * eps3 + eps5 * eps5;
-
-            Double_t epspl  = TMath::Sqrt(sum) / 2.;
-            Double_t calEps = p_h - TMath::Abs(p_l);
-            if (TMath::Abs(calEps) > epspl) {
-               std::cout << " Warning! Wrong kinematics! Skeep the point!"
-                         << std::endl << " p_h  = " << p_h
-                         << std::endl << " p_l  = " << p_l
-                         << "\t"      << calEps << std::endl;
-               return;
-            } else {
-               std::cout << "Zero p_t! " << p_l
-                         << "\t"         << calEps
-                         << "\t"         << epspl << std::endl;
-               p_l = TMath::Sign(1., p_l) * p_h;
-            }
-        }
-        p_t = TMath::Sqrt(p_h * p_h - p_l * p_l);
     }
 
 #ifdef DEBUG
-    std::cout << "Pt     " << std::setw(20) << std::setprecision(10) << p_t  << std::endl;
-    std::cout << "Pl     " << std::setw(20) << std::setprecision(10) << p_l  << std::endl;
-    std::cout << "tdif   " << std::setw(20) << std::setprecision(10) << t << std::endl;
+    std::cout << "Pt     " << std::setw(20) << std::setprecision(10) << fHadKin.Pt() << std::endl;
+    std::cout << "Pl     " << std::setw(20) << std::setprecision(10) << fHadKin.Pl() << std::endl;
+    std::cout << "tdif   " << std::setw(20) << std::setprecision(10) << fKin.T() << std::endl;
 #endif
 
-    Double_t px2_max = W2 - m_h * m_h;
-    px2 = M * M + S_x * (1. - z) + t;
+    fInv.EvaluateV12(fKin,fHadKin);
+    fHadKin.EvaluatePx2(fKin,fInv);
 
-    if (px2 < kMassC2 || px2 > px2_max) {
-        std::cout << " Warning! Wrong kinematics! Skeep the point!" << std::endl
-                  << " p_x^2     = " << px2 << std::endl
-                  << " mc2       = " << kMassC2 << std::endl
-                  << " p_x^2 max = " << px2_max << std::endl;
-        return;
-    }
-
-    t_min = m_h * m_h - Q2 + 2. * (sqnuq * p_h - nu * E_h);
+    t_min = m_h * m_h - fInv.Q2() + 2. * (fHadKin.SqNuQ() * fHadKin.Ph() - fHadKin.Nu() * fHadKin.Eh());
 
     Double_t tdmax;
-    tdmax = m_h * m_h - Q2 + 2. * (- sqnuq * p_h - nu * E_h);
+    tdmax = m_h * m_h - fInv.Q2() + 2. * (- fHadKin.SqNuQ() * fHadKin.Ph() - fHadKin.Nu() * fHadKin.Eh());
 
-    if ((t - t_min) > kEpsMachine || t < tdmax) {
+    if ((fKin.T() - t_min) > kEpsMachine || fKin.T() < tdmax) {
         std::cout << " Warning! Wrong kinematics! Skeep the point!" << std::endl
-                  << " t     = " << t << std::endl
+                  << " t     = " << fKin.T() << std::endl
                   << " t_max = " << tdmax << std::endl
-                  << " t_min = " << t_min << " - " << t - t_min << std::endl;
+                  << " t_min = " << t_min << " - " << fKin.T() - t_min << std::endl;
         return;
     }
 
@@ -368,92 +258,8 @@ void TRadCor::Haprad(void)
 
 
 
-void TRadCor::Conkin()
-{
-    X   = S * (1. - y);
-    S_x = S - X;
-    S_p = S + X;
-    W2  = S - X - Q2 + M * M;
-
-    lambda_s = S * S - 4. * m * m * M * M;
-    lambda_x = X * X - 4. * m * m * M * M;
-    lambda_m = Q2 * Q2 + 4. * m * m * Q2;
-    lambda_q = TMath::Power(S_x, 2) + 4. * M * M * Q2;
-
-#ifdef DEBUG
-    std::cout.setf(std::ios::fixed);
-    std::cout << "X      " << std::setw(20) << std::setprecision(10) << X        << std::endl;
-    std::cout << "S_x    " << std::setw(20) << std::setprecision(10) << S_x      << std::endl;
-    std::cout << "S_p    " << std::setw(20) << std::setprecision(10) << S_p      << std::endl;
-    std::cout << "W2     " << std::setw(20) << std::setprecision(10) << W2       << std::endl;
-    std::cout << "l_s    " << std::setw(20) << std::setprecision(10) << lambda_s << std::endl;
-    std::cout << "l_x    " << std::setw(20) << std::setprecision(10) << lambda_x << std::endl;
-    std::cout << "l_m    " << std::setw(20) << std::setprecision(10) << lambda_m << std::endl;
-    std::cout << "l_q    " << std::setw(20) << std::setprecision(10) << lambda_q << std::endl;
-#endif
-
-    if (lambda_s < 0.) std::cout << " Conkin: lambda_s < 0 " << std::endl;
-    if (lambda_x < 0.) std::cout << " Conkin: lambda_x < 0 " << std::endl;
-    if (lambda_q < 0.) std::cout << " Conkin: lambda_q < 0 " << std::endl;
-    if (lambda_m < 0.) std::cout << " Conkin: lambda_m < 0 " << std::endl;
-
-
-    Double_t sqrt_lq, sqrt_lm;
-    sqrt_lq = TMath::Sqrt(TMath::Max(0., lambda_q));
-    sqrt_lm = TMath::Sqrt(TMath::Max(0., lambda_m));
-
-    nu  = S_x / (2. * M);
-    N   = kPi * kAlpha * kAlpha * y * S_x * M / 2. / sqrt_lq * kBarn;
-
-#ifdef DEBUG
-    std::cout << "nu     " << std::setw(20) << std::setprecision(10) << nu << std::endl;
-    std::cout << "N      " << std::setw(20) << std::setprecision(10) << N << std::endl;
-#endif
-
-    tau_max = (S_x + sqrt_lq) / (2. * M * M);
-    tau_min = - Q2 / (M * M) / tau_max;
-}
-
-
-
 void TRadCor::SPhiH(void)
 {
-    Double_t sqrt_ls, sqrt_lx, sqrt_lq;
-    Double_t costs, costx, sints, sintx;
-    Double_t lambda;
-
-    sqrt_ls = TMath::Sqrt(TMath::Max(0., lambda_s));
-    sqrt_lx = TMath::Sqrt(TMath::Max(0., lambda_x));
-    sqrt_lq = TMath::Sqrt(TMath::Max(0., lambda_q));
-
-    costs = (S * (S - X) + 2. * M * M * Q2) / sqrt_ls / sqrt_lq;
-    costx = (X * (S - X) - 2. * M * M * Q2) / sqrt_lx / sqrt_lq;
-
-    lambda = S * X * Q2 - M * M * Q2 * Q2 - m * m * lambda_q;
-
-    if (lambda > 0) {
-        sints = 2. * M * TMath::Sqrt(lambda) / sqrt_ls / sqrt_lq;
-        sintx = 2. * M * TMath::Sqrt(lambda) / sqrt_lx / sqrt_lq;
-    } else {
-        std::cout << "sphi: sints = NaN " << lambda << std::endl;
-        std::cout << "sphi: sintx = NaN " << lambda << std::endl;
-        sints = 0.;
-        sintx = 0.;
-    }
-
-    Double_t v1, v2;
-    v1 = costs * p_l + sints * p_t * TMath::Cos(phi);
-    v2 = costx * p_l + sintx * p_t * TMath::Cos(phi);
-
-    V_1 = (S * E_h - sqrt_ls * v1) / M;
-    V_2 = (X * E_h - sqrt_lx * v2) / M;
-
-#ifdef DEBUG
-    std::cout.setf(std::ios::fixed);
-    std::cout << "V1     " << std::setw(20) << std::setprecision(10) << V_1  << std::endl;
-    std::cout << "V2     " << std::setw(20) << std::setprecision(10) << V_2  << std::endl;
-#endif
-
     Deltas();
 
     Double_t sibt;

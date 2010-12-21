@@ -2,6 +2,9 @@
 #define TRADCOR_H
 
 #include "TROOT.h"
+#include "TKinematicalVariables.h"
+#include "TLorentzInvariants.h"
+#include "THadronKinematics.h"
 #include "TGlobalConfig.h"
 
 
@@ -34,7 +37,6 @@ public:
 private:
     void        Setup(void);
     void        Haprad(void);
-    void        Conkin(void);
     void        SPhiH(void);
     void        Deltas(void);
     Double_t    VacPol(void);
@@ -47,6 +49,9 @@ private:
     Double_t    tails(Double_t tau, Double_t (&theta)[4][3], Double_t mu);
     void        strf(Double_t tau, Double_t mu, Double_t R, Double_t (&sfm)[4]);
 
+    TKinematicalVariables   fKin;
+    TLorentzInvariants      fInv;
+    THadronKinematics       fHadKin;
     TGlobalConfig fConfig;
 
     Double_t     E;        // The beam energy
@@ -54,14 +59,7 @@ private:
     Double_t     Mx2;          // Missing mass squared
 
     //  Kinematic variables
-    Double_t     x;
-    Double_t     y;
-    Double_t     y_i;
-    Double_t     z;
-    Double_t     t;
-    Double_t     t_i;
     Double_t     t_min;
-    Double_t     phi;
 
     // Results
     Double_t     rc;
@@ -77,27 +75,6 @@ private:
     Double_t     m;
     Double_t     m_h;
 
-    // Lorentz invariants
-    Double_t     S;
-    Double_t     X;
-    Double_t     Q2;
-    Double_t     W2;
-    Double_t     S_x;
-    Double_t     S_p;
-    Double_t     lambda_q;
-    Double_t     lambda_s;
-    Double_t     lambda_x;
-    Double_t     V_1;
-    Double_t     V_2;
-
-    Double_t     lambda_m;
-
-    // Detected hadron kinematics
-    Double_t     E_h;
-    Double_t     p_h;
-    Double_t     p_t;
-    Double_t     p_l;
-    Double_t     nu;
 
     // Deltas
     Double_t     px2;
@@ -106,8 +83,6 @@ private:
     Double_t     N;                // Normalization factor
     Double_t     pl;
     Int_t        ita;
-    Double_t     tau_max;
-    Double_t     tau_min;
     Double_t     phi_rad;
 
     // Epsilons
