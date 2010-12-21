@@ -36,7 +36,7 @@ OBJ_DIR  := .obj
 DICT_DIR := .dict
 DEP_DIR  := .dep
 
-SRC_CODE   := TRadCor.cxx THapradUtils.cxx
+SRC_CODE   := $(wildcard *.cxx)
 SRC_CLASS  := TRadCor.cxx
 SRC_DEP    := $(addprefix $(DEP_DIR)/,$(SRC_CODE:.cxx=.d))
 SRC_OBJ    := $(addprefix $(OBJ_DIR)/,$(SRC_CODE:.cxx=.o))

@@ -2,6 +2,7 @@
 #define TRADCOR_H
 
 #include "TROOT.h"
+#include "TGlobalConfig.h"
 
 
 class TRadCor {
@@ -46,6 +47,7 @@ private:
     Double_t    tails(Double_t tau, Double_t (&theta)[4][3], Double_t mu);
     void        strf(Double_t tau, Double_t mu, Double_t R, Double_t (&sfm)[4]);
 
+    TGlobalConfig fConfig;
 
     Double_t     E;        // The beam energy
     Double_t     maxMx2;       // The maximum allowable amount of missing mass squared
@@ -112,11 +114,6 @@ private:
     Double_t     eps_phir;
     Double_t     eps_tau;
     Double_t     eps_rr;
-
-    // Configurations
-    Int_t        polType;
-    Int_t        int_phi_rad;
-    Int_t        int_phi_had;
 };
 
 #endif

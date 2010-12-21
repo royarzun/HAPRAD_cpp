@@ -10,8 +10,7 @@ TRadCor::TRadCor()
   x(0.), y_i(0.), z(0.), t_i(0.), phi(0.),
   sigma_born(0.), sig_obs(0.), delta(0.), tail(0.),
   M(kMassProton), m(kMassElectron), m_h(kMassDetectedHadron),
-  eps_phir(0.01), eps_tau(0.001), eps_rr(0.001),
-  polType(0), int_phi_rad(0), int_phi_had(0)
+  eps_phir(0.01), eps_tau(0.001), eps_rr(0.001)
 {
     // Default constructor
 }
@@ -24,8 +23,7 @@ TRadCor::TRadCor(Double_t E, Double_t x, Double_t Q2, Double_t z,
   x(0.), y_i(0.), z(0.), t_i(0.), phi(0.),
   sigma_born(0.), sig_obs(0.), delta(0.), tail(0.),
   M(kMassProton), m(kMassElectron), m_h(kMassDetectedHadron),
-  eps_phir(0.01), eps_tau(0.001), eps_rr(0.001),
-  polType(0), int_phi_rad(0), int_phi_had(0)
+  eps_phir(0.01), eps_tau(0.001), eps_rr(0.001)
 {
     // Normal constructor for a radiative correction object
     //
@@ -139,6 +137,8 @@ void TRadCor::RegisteredLepton(Int_t type)
             m = kMassMuon;
             break;
     }
+
+    fConfig.SetLepton(type);
 }
 
 
@@ -149,7 +149,7 @@ void TRadCor::IntegratePhiRad(Int_t type)
     //
     // Default is 0;
 
-    int_phi_rad = type;
+    fConfig.SetIntegrationPhiRad(type);
 }
 
 
@@ -160,7 +160,7 @@ void TRadCor::IntegratePhiHad(Int_t type)
     //
     // Default is 0;
 
-    int_phi_had = type;
+    fConfig.SetIntegrationPhiHad(type);
 }
 
 
@@ -173,7 +173,7 @@ void TRadCor::SetPolarization(Int_t type)
     //
     // Default is 0;
 
-    polType = type;
+    fConfig.SetPolarization(type);
 }
 
 
@@ -459,7 +459,7 @@ void TRadCor::SPhiH(void)
     Double_t sibt;
     Int_t it_end = 3;
 
-    if (polType == 0) {
+    if (fConfig.PolarizationType() == 0) {
         it_end = 1;
     }
 
