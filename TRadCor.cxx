@@ -6,7 +6,7 @@
 
 
 TRadCor::TRadCor()
-: E(0), maxMx2(0.), Mx2(0.),
+: maxMx2(0.), Mx2(0.),
   sigma_born(0.), sig_obs(0.), tail(0.),
   M(kMassProton), m(kMassElectron), m_h(kMassDetectedHadron),
   eps_phir(0.01), eps_tau(0.001), eps_rr(0.001)
@@ -20,8 +20,8 @@ TRadCor::TRadCor()
 
 TRadCor::TRadCor(Double_t E, Double_t x, Double_t Q2, Double_t z,
                  Double_t p_t, Double_t phi, Double_t maxMx2)
-: fKin(x,-Q2,z,p_t,phi/kRadianDeg),
-  E(0), maxMx2(0.), Mx2(0.),
+: fKin(x,-Q2,z,p_t,phi/kRadianDeg,E),
+  maxMx2(0.), Mx2(0.),
   sigma_born(0.), sig_obs(0.), tail(0.),
   M(kMassProton), m(kMassElectron), m_h(kMassDetectedHadron),
   eps_phir(0.01), eps_tau(0.001), eps_rr(0.001)
@@ -58,10 +58,9 @@ void TRadCor::SetParameters(Double_t E, Double_t x, Double_t Q2, Double_t z,
     // section of hadron electroproduction, and maxMx2 is the maximum amount
     // of missing mass.
 
-    this->E   = E;
     this->maxMx2 = maxMx2;
 
-    fKin.SetAll(x,-Q2,z,p_t,phi/kRadianDeg);
+    fKin.SetAll(x,-Q2,z,p_t,phi/kRadianDeg,E);
     Setup();
 }
 
@@ -69,7 +68,7 @@ void TRadCor::SetParameters(Double_t E, Double_t x, Double_t Q2, Double_t z,
 
 void TRadCor::SetEbeam(Double_t E)
 {
-    this->E = E;
+    fKin.SetE(E);
 }
 
 
@@ -213,7 +212,7 @@ void TRadCor::Haprad(void)
     pl = 0.;
 
     try {
-        fInv.Evaluate(fKin, E);
+        fInv.Evaluate(fKin);
     } catch (TKinematicException& wrongKin) {
         std::cout << wrongKin.what() << std::endl;
         return;

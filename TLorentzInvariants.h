@@ -13,7 +13,7 @@ public:
     TLorentzInvariants();
     ~TLorentzInvariants();
 
-    void        Evaluate(TKinematicalVariables& kin, Double_t E);
+    void        Evaluate(TKinematicalVariables& kin);
     void        EvaluateV12(const TKinematicalVariables& kin,
                             const THadronKinematics& hkin);
 

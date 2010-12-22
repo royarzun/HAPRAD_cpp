@@ -24,7 +24,7 @@ TLorentzInvariants::~TLorentzInvariants()
 
 
 
-void TLorentzInvariants::Evaluate(TKinematicalVariables& kin, Double_t E)
+void TLorentzInvariants::Evaluate(TKinematicalVariables& kin)
 {
     using namespace TMath;
 
@@ -42,7 +42,7 @@ void TLorentzInvariants::Evaluate(TKinematicalVariables& kin, Double_t E)
             m = kMassElectron;
     }
 
-    fS = 2. * M * E;
+    fS = 2. * M * kin.E();
 
     if (kin.Y() >= 0.) {
         fQ2 = fS * kin.X() * kin.Y();
