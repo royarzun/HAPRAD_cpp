@@ -43,7 +43,6 @@ private:
     void        Setup(void);
     void        Haprad(void);
     void        SPhiH(void);
-    Double_t    Bornin(void);
     void        BorninTest(Double_t& sigma_born);
     void        qqt(Double_t& tai);
     Double_t    qqtphi(Double_t phi);

@@ -1,7 +1,10 @@
 #include "TRadCor.h"
 #include "THapradException.h"
+
 #include "TDelta.h"
+#include "TBorn.h"
 #include "haprad_constants.h"
+
 #include <iostream>
 #include <iomanip>
 
@@ -297,7 +300,8 @@ void TRadCor::SPhiH(void)
             std::cout << "********** ita: " << ita
                       << " *********" << std::endl;
             if (ita == 1) {
-                sigma_born = Bornin();
+                TBorn fBornin(this);
+                sigma_born = fBornin.GetValue(N);
                 BorninTest(sibt);
                 std::cout << "sib1" << sigma_born << std::endl;
                 std::cout << "sibt" << sibt << std::endl;
@@ -315,45 +319,6 @@ void TRadCor::SPhiH(void)
         sig_obs = sigma_born * extai1 * (1. + fDeltas.VR() + fDeltas.Vac()) +
                                                             tai[1] + tai[2];
     }
-}
-
-
-
-
-
-
-Double_t TRadCor::Bornin(void)
-{
-    /*
-    Double_t H[4];
-    Double_t thetaB[4];
-
-    strf(0.,0.,0,H);
-
-    thetaB[0] = Q2;
-    thetaB[1] = (S * X - M * M * Q2) / 2.;
-    thetaB[2] = (V_1 * V_2 - m_h * m_h * Q2) / 2.;
-    thetaB[3] = (V_2 * S + V_1 * X - z * Q2 * S_x) / 2.;
-
-#ifdef DEBUG
-        std::cout << "    BORNIN      " << std::endl;
-#endif
-
-    Double_t sum = 0.;
-    for (Int_t i = 0; i < 4; ++i) {
-        sum = sum + thetaB[i] * H[i];
-#ifdef DEBUG
-        std::cout.setf(std::ios::fixed);
-        std::cout << "    i         " << std::setw(20) << std::setprecision(10) << i         << std::endl;
-        std::cout << "    theta^B_i " << std::setw(20) << std::setprecision(10) << thetaB[i] << std::endl;
-        std::cout << "    H[i]      " << std::setw(20) << std::setprecision(10) << H[i]      << std::endl;
-        std::cout << "    sum       " << std::setw(20) << std::setprecision(10) << sum       << std::endl;
-#endif
-    }
-
-    return sum * N / Q2 / Q2 * 2.;
-*/
-    return 0;
 }
 
 
