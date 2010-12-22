@@ -2,10 +2,10 @@
 #define TRADCOR_H
 
 #include "TROOT.h"
+#include "TGlobalConfig.h"
 #include "TKinematicalVariables.h"
 #include "TLorentzInvariants.h"
 #include "THadronKinematics.h"
-#include "TGlobalConfig.h"
 
 
 class TRadCor {
@@ -49,10 +49,11 @@ private:
     Double_t    tails(Double_t tau, Double_t (&theta)[4][3], Double_t mu);
     void        strf(Double_t tau, Double_t mu, Double_t R, Double_t (&sfm)[4]);
 
+
+    TGlobalConfig           fConfig;
     TKinematicalVariables   fKin;
     TLorentzInvariants      fInv;
     THadronKinematics       fHadKin;
-    TGlobalConfig fConfig;
 
     Double_t     E;        // The beam energy
     Double_t     maxMx2;       // The maximum allowable amount of missing mass squared
