@@ -1,15 +1,22 @@
 #include "TDelta.h"
+
+#include "TRadCor.h"
 #include "TGlobalConfig.h"
+#include "TKinematicalVariables.h"
 #include "TLorentzInvariants.h"
 #include "THadronKinematics.h"
+
 #include "THapradUtils.h"
 #include "haprad_constants.h"
 
 
-TDelta::TDelta()
+TDelta::TDelta(const TRadCor* rc)
   : fVR(0), fInf(0), fVac(0)
 {
-    // Do nothing
+    fConfig = rc->GetConfig();
+    fKin    = rc->GetKinematicalVariables();
+    fInv    = rc->GetLorentzInvariants();
+    fHadKin = rc->GetHadronKinematics();
 }
 
 
@@ -21,8 +28,7 @@ TDelta::~TDelta()
 
 
 
-void TDelta::Evaluate(const TLorentzInvariants& inv,
-                      const THadronKinematics& hkin)
+void TDelta::Evaluate(void)
 {
     using namespace TMath;
 
@@ -39,8 +45,8 @@ void TDelta::Evaluate(const TLorentzInvariants& inv,
             m = kMassElectron;
     }
 
-    Double_t S_ = inv.S() - inv.Q2() - inv.V1();
-    Double_t X_ = inv.X() + inv.Q2() - inv.V2();
+    Double_t S_ = fInv->S() - fInv->Q2() - fInv->V1();
+    Double_t X_ = fInv->X() + fInv->Q2() - fInv->V2();
 
 #ifdef DEBUG
     std::cout.setf(std::ios::fixed);
@@ -48,12 +54,12 @@ void TDelta::Evaluate(const TLorentzInvariants& inv,
     std::cout << "X'     " << std::setw(20) << std::setprecision(10) << X_  << std::endl;
 #endif
 
-    Double_t l_m  = Log(inv.Q2() / (m * m));
-    Double_t Li_2 = HapradUtils::fspen(1. - hkin.Px2() * inv.Q2() / (S_ * X_));
+    Double_t l_m  = Log(fInv->Q2() / (m * m));
+    Double_t Li_2 = HapradUtils::fspen(1. - fHadKin->Px2() * fInv->Q2() / (S_ * X_));
 
     fVR  = 1.5 * l_m - 2. - 0.5 * Power(Log(X_ / S_),2) + Li_2 - kPi * kPi / 6.;
-    fInf = (l_m - 1.) * Log(Power(hkin.Px2() - kMassC2, 2) / S_ / X_);
-    fVac = VacPol(inv.Q2());
+    fInf = (l_m - 1.) * Log(Power(fHadKin->Px2() - kMassC2, 2) / S_ / X_);
+    fVac = VacPol(fInv->Q2());
 
     fVR  *= kAlpha / kPi;
     fInf *= kAlpha / kPi;

@@ -1,18 +1,21 @@
 #include "TLorentzInvariants.h"
-#include "TKinematicalVariables.h"
-#include "THapradException.h"
-#include "THadronKinematics.h"
+#include "TRadCor.h"
 #include "TGlobalConfig.h"
+#include "TKinematicalVariables.h"
+#include "THadronKinematics.h"
+#include "THapradException.h"
 
 #include "haprad_constants.h"
 
 #include <iostream>
 
 
-TLorentzInvariants::TLorentzInvariants()
+TLorentzInvariants::TLorentzInvariants(const TRadCor* rc)
  : fS(0), fX(0), fSx(0), fSp(0), fQ2(0)
 {
-    // Do nothing
+    fConfig = rc->GetConfig();
+    fKin    = rc->GetKinematicalVariables();
+    fHadKin = rc->GetHadronKinematics();
 }
 
 
@@ -24,7 +27,7 @@ TLorentzInvariants::~TLorentzInvariants()
 
 
 
-void TLorentzInvariants::Evaluate(TKinematicalVariables& kin)
+void TLorentzInvariants::Evaluate(void)
 {
     using namespace TMath;
 
@@ -42,32 +45,31 @@ void TLorentzInvariants::Evaluate(TKinematicalVariables& kin)
             m = kMassElectron;
     }
 
-    fS = 2. * M * kin.E();
+    fS = 2. * M * fKin->E();
 
-    if (kin.Y() >= 0.) {
-        fQ2 = fS * kin.X() * kin.Y();
+    Double_t y;
+    if (fKin->Y() >= 0.) {
+        y = - fKin->Y();
+        fQ2 = fS * fKin->X() * fKin->Y();
     } else {
-        fQ2 = - kin.Y();
-        Double_t y = fQ2 / (fS * kin.X());
-        kin.SetY(y);
+        fQ2 = - fKin->Y();
+        y = fQ2 / (fS * fKin->X());
     }
 
 #ifdef DEBUG
     std::cout.setf(std::ios::fixed);
-    std::cout << "S      " << std::setw(20) << std::setprecision(10) << fS << std::endl;
-    std::cout << "y      " << std::setw(20) << std::setprecision(10) << kin.Y() << std::endl;
-    std::cout << "Q^2    " << std::setw(20) << std::setprecision(10) << fQ2  << std::endl;
+    std::cout << "S      " << std::setw(20) << std::setprecision(10) << fS  << std::endl;
+    std::cout << "y      " << std::setw(20) << std::setprecision(10) << y   << std::endl;
+    std::cout << "Q^2    " << std::setw(20) << std::setprecision(10) << fQ2 << std::endl;
 #endif
 
-    Double_t y_max = 1. / (1. + M * M * kin.X() / fS);
-    Double_t y_min = (kMassC2 - M * M) / (fS * (1. - kin.X()));
+    Double_t y_max = 1. / (1. + M * M * fKin->X() / fS);
+    Double_t y_min = (kMassC2 - M * M) / (fS * (1. - fKin->X()));
 
-    if (kin.Y() > y_max || kin.Y() < y_min ||
-            kin.X() > 1. || kin.X() < 0.) {
+    if (y > y_max || y < y_min || fKin->X() > 1. || fKin->X() < 0.)
         throw TKinematicException();
-    }
 
-    fX  = fS * (1. - kin.Y());
+    fX  = fS * (1. - y);
     fSx = fS - fX;
     fSp = fS + fX;
     fW2 = fS - fX - fQ2 + M * M;
@@ -101,8 +103,7 @@ void TLorentzInvariants::Evaluate(TKinematicalVariables& kin)
 
 
 
-void TLorentzInvariants::EvaluateV12(const TKinematicalVariables& kin,
-                                     const THadronKinematics& hadKin)
+void TLorentzInvariants::EvaluateV12(void)
 {
     using namespace TMath;
 
@@ -139,11 +140,11 @@ void TLorentzInvariants::EvaluateV12(const TKinematicalVariables& kin,
     }
 
     Double_t v1, v2;
-    v1 = costs * hadKin.Pl() + sints * hadKin.Pt() * Cos(kin.PhiH());
-    v2 = costx * hadKin.Pl() + sintx * hadKin.Pt() * Cos(kin.PhiH());
+    v1 = costs * fHadKin->Pl() + sints * fHadKin->Pt() * Cos(fKin->PhiH());
+    v2 = costx * fHadKin->Pl() + sintx * fHadKin->Pt() * Cos(fKin->PhiH());
 
-    fV1 = (fS * hadKin.Eh() - fSqrtLs * v1) / M;
-    fV2 = (fX * hadKin.Eh() - fSqrtLx * v2) / M;
+    fV1 = (fS * fHadKin->Eh() - fSqrtLs * v1) / M;
+    fV2 = (fX * fHadKin->Eh() - fSqrtLx * v2) / M;
 
 #ifdef DEBUG
     std::cout.setf(std::ios::fixed);

@@ -3,19 +3,19 @@
 
 #include "TROOT.h"
 
+class TRadCor;
+class TGlobalConfig;
 class TKinematicalVariables;
 class THadronKinematics;
-class TGlobalConfig;
 
 
 class TLorentzInvariants {
 public:
-    TLorentzInvariants();
+    TLorentzInvariants(const TRadCor* rc);
     ~TLorentzInvariants();
 
-    void        Evaluate(TKinematicalVariables& kin);
-    void        EvaluateV12(const TKinematicalVariables& kin,
-                            const THadronKinematics& hkin);
+    void        Evaluate(void);
+    void        EvaluateV12(void);
 
     Double_t    S(void)   const { return fS; };
     Double_t    X(void)   const { return fX; };
@@ -36,10 +36,10 @@ public:
     Double_t    SqrtLm(void) const { return fSqrtLm; };
     Double_t    SqrtLq(void) const { return fSqrtLq; };
 
-    void        GlobalConfig(const TGlobalConfig* config) { fConfig = config; };
-
 private:
-    const TGlobalConfig* fConfig;
+    const TGlobalConfig*            fConfig;
+    const TKinematicalVariables*    fKin;
+    const THadronKinematics*        fHadKin;
 
     Double_t    fS;
     Double_t    fX;

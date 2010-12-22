@@ -1,26 +1,26 @@
 #include "TRadCor.h"
 #include "THapradException.h"
+#include "TDelta.h"
 #include "haprad_constants.h"
 #include <iostream>
 #include <iomanip>
 
 
 TRadCor::TRadCor()
-: maxMx2(0.), Mx2(0.),
+: fInv(this), fHadKin(this),
+  maxMx2(0.), Mx2(0.),
   sigma_born(0.), sig_obs(0.), tail(0.),
   M(kMassProton), m(kMassElectron), m_h(kMassDetectedHadron),
   eps_phir(0.01), eps_tau(0.001), eps_rr(0.001)
 {
     // Default constructor
-    fInv.GlobalConfig(&fConfig);
-    fDeltas.GlobalConfig(&fConfig);
 }
 
 
 
 TRadCor::TRadCor(Double_t E, Double_t x, Double_t Q2, Double_t z,
                  Double_t p_t, Double_t phi, Double_t maxMx2)
-: fKin(x,-Q2,z,p_t,phi/kRadianDeg,E),
+: fInv(this), fHadKin(this),
   maxMx2(0.), Mx2(0.),
   sigma_born(0.), sig_obs(0.), tail(0.),
   M(kMassProton), m(kMassElectron), m_h(kMassDetectedHadron),
@@ -33,8 +33,7 @@ TRadCor::TRadCor(Double_t E, Double_t x, Double_t Q2, Double_t z,
     // section of hadron electroproduction, and maxMx2 is the maximum amount
     // of missing mass.
 
-    fInv.GlobalConfig(&fConfig);
-    fDeltas.GlobalConfig(&fConfig);
+    fKin.SetAll(x,-Q2,z,p_t,phi/kRadianDeg,E);
     Setup();
 }
 
@@ -212,14 +211,18 @@ void TRadCor::Haprad(void)
     pl = 0.;
 
     try {
-        fInv.Evaluate(fKin);
+        fInv.Evaluate();
+        if (fKin.Y() < 0.) {
+            Double_t y = fInv.Q2() / (fInv.S() * fKin.X());
+            fKin.SetY(y);
+        }
     } catch (TKinematicException& wrongKin) {
         std::cout << wrongKin.what() << std::endl;
         return;
     }
 
     try {
-        fHadKin.Evaluate(fKin, fInv);
+        fHadKin.Evaluate();
     } catch (TKinematicException& wrongKin) {
         std::cout << wrongKin.what() << std::endl;
         return;
@@ -252,8 +255,8 @@ void TRadCor::Haprad(void)
     std::cout << "tdif   " << std::setw(20) << std::setprecision(10) << fKin.T() << std::endl;
 #endif
 
-    fInv.EvaluateV12(fKin,fHadKin);
-    fHadKin.EvaluatePx2(fKin,fInv);
+    fInv.EvaluateV12();
+    fHadKin.EvaluatePx2();
 
     t_min = m_h * m_h - fInv.Q2() + 2. * (fHadKin.SqNuQ() * fHadKin.Ph() - fHadKin.Nu() * fHadKin.Eh());
 
@@ -279,7 +282,8 @@ void TRadCor::Haprad(void)
 
 void TRadCor::SPhiH(void)
 {
-    fDeltas.Evaluate(fInv,fHadKin);
+    TDelta fDeltas(this);
+    fDeltas.Evaluate();
 
     Double_t sibt;
     Int_t it_end = 3;
