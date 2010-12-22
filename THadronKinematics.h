@@ -1,3 +1,6 @@
+#ifndef THADRONKINEMATICS_H
+#define THADRONKINEMATICS_H
+
 #include "TROOT.h"
 
 class TKinematicalVariables;
@@ -37,3 +40,5 @@ private:
     Double_t    fPx2;
     Double_t    fPh;
 };
+
+#endif

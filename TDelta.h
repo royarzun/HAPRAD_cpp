@@ -1,3 +1,6 @@
+#ifndef TDELTA_H
+#define TDELTA_H
+
 #include "TROOT.h"
 
 class TGlobalConfig;
@@ -28,3 +31,5 @@ private:
     Double_t    fInf;
     Double_t    fVac;
 };
+
+#endif

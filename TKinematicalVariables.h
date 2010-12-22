@@ -1,3 +1,6 @@
+#ifndef TKINEMATICALVARIABLES_H
+#define TKINEMATICALVARIABLES_H
+
 #include "TROOT.h"
 
 class TKinematicalVariables {
@@ -30,3 +33,5 @@ private:
     Double_t    fT;
     Double_t    fPhiH;
 };
+
+#endif

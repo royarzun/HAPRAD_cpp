@@ -1,3 +1,6 @@
+#ifndef TGLOBALCONFIG_H
+#define TGLOBALCONFIG_H
+
 #include "TROOT.h"
 
 
@@ -21,3 +24,5 @@ private:
     Int_t       fPhiHad;
     Int_t       fPhiRad;
 };
+
+#endif

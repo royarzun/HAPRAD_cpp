@@ -1,3 +1,6 @@
+#ifndef TLORENTZINVARIANTS_H
+#define TLORENTZINVARIANTS_H
+
 #include "TROOT.h"
 
 class TKinematicalVariables;
@@ -58,3 +61,5 @@ private:
     Double_t    fV1;
     Double_t    fV2;
 };
+
+#endif
