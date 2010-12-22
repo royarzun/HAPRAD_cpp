@@ -12,6 +12,8 @@ TRadCor::TRadCor()
   eps_phir(0.01), eps_tau(0.001), eps_rr(0.001)
 {
     // Default constructor
+    fInv.GlobalConfig(&fConfig);
+    fDeltas.GlobalConfig(&fConfig);
 }
 
 
@@ -31,6 +33,8 @@ TRadCor::TRadCor(Double_t E, Double_t x, Double_t Q2, Double_t z,
     // section of hadron electroproduction, and maxMx2 is the maximum amount
     // of missing mass.
 
+    fInv.GlobalConfig(&fConfig);
+    fDeltas.GlobalConfig(&fConfig);
     Setup();
 }
 
