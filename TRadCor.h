@@ -49,7 +49,6 @@ private:
     Double_t    rv2ln(Double_t tauln);
     Double_t    podinl(Double_t R);
     Double_t    tails(Double_t tau, Double_t (&theta)[4][3], Double_t mu);
-    void        strf(Double_t tau, Double_t mu, Double_t R, Double_t (&sfm)[4]);
 
 
     TGlobalConfig           fConfig;
