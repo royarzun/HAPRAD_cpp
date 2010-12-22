@@ -7,6 +7,8 @@
 #include "TLorentzInvariants.h"
 #include "THadronKinematics.h"
 
+#include "TDelta.h"
+
 
 class TRadCor {
 public:
@@ -38,8 +40,6 @@ private:
     void        Setup(void);
     void        Haprad(void);
     void        SPhiH(void);
-    void        Deltas(void);
-    Double_t    VacPol(void);
     Double_t    Bornin(void);
     void        BorninTest(Double_t& sigma_born);
     void        qqt(Double_t& tai);
@@ -55,6 +55,8 @@ private:
     TLorentzInvariants      fInv;
     THadronKinematics       fHadKin;
 
+    TDelta                  fDeltas;
+
     Double_t     E;        // The beam energy
     Double_t     maxMx2;       // The maximum allowable amount of missing mass squared
     Double_t     Mx2;          // Missing mass squared
@@ -66,8 +68,6 @@ private:
     Double_t     rc;
     Double_t     sigma_born;    // sigma_0
     Double_t     sig_obs;       // sigma_{obs}
-    Double_t     del_inf;
-    Double_t     delta;
     Double_t     tail;
     Double_t     tai[3];
 
@@ -75,10 +75,6 @@ private:
     Double_t     M;
     Double_t     m;
     Double_t     m_h;
-
-
-    // Deltas
-    Double_t     px2;
 
     // Integration
     Double_t     N;                // Normalization factor

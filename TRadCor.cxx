@@ -1,5 +1,4 @@
 #include "TRadCor.h"
-#include "THapradUtils.h"
 #include "THapradException.h"
 #include "haprad_constants.h"
 #include <iostream>
@@ -8,7 +7,7 @@
 
 TRadCor::TRadCor()
 : E(0), maxMx2(0.), Mx2(0.),
-  sigma_born(0.), sig_obs(0.), delta(0.), tail(0.),
+  sigma_born(0.), sig_obs(0.), tail(0.),
   M(kMassProton), m(kMassElectron), m_h(kMassDetectedHadron),
   eps_phir(0.01), eps_tau(0.001), eps_rr(0.001)
 {
@@ -21,7 +20,7 @@ TRadCor::TRadCor(Double_t E, Double_t x, Double_t Q2, Double_t z,
                  Double_t p_t, Double_t phi, Double_t maxMx2)
 : fKin(x,-Q2,z,p_t,phi/kRadianDeg),
   E(0), maxMx2(0.), Mx2(0.),
-  sigma_born(0.), sig_obs(0.), delta(0.), tail(0.),
+  sigma_born(0.), sig_obs(0.), tail(0.),
   M(kMassProton), m(kMassElectron), m_h(kMassDetectedHadron),
   eps_phir(0.01), eps_tau(0.001), eps_rr(0.001)
 {
@@ -277,7 +276,7 @@ void TRadCor::Haprad(void)
 
 void TRadCor::SPhiH(void)
 {
-    Deltas();
+    fDeltas.Evaluate(fInv,fHadKin);
 
     Double_t sibt;
     Int_t it_end = 3;
@@ -304,97 +303,16 @@ void TRadCor::SPhiH(void)
             std::cout << "tai[" << ita
                       << "]\t"  << tai[ita] << std::endl;
         }
-         del_inf = 0.;
-         Double_t extai1 = TMath::Exp(kAlpha / kPi * del_inf);
-         sig_obs = sigma_born * extai1 *
-                    (1. + kAlpha / kPi * (delta - del_inf)) +
-                            tai[1] + tai[2];
+
+        Double_t extai1 = TMath::Exp(fDeltas.Inf());
+        sig_obs = sigma_born * extai1 * (1. + fDeltas.VR() + fDeltas.Vac()) +
+                                                            tai[1] + tai[2];
     }
 }
 
 
 
-void TRadCor::Deltas(void)
-{
-/*
-    Double_t delta_vac = VacPol();
-    Double_t S_ = S - Q2 - V_1;
-    Double_t X_ = X + Q2 - V_2;
 
-#ifdef DEBUG
-    std::cout.setf(std::ios::fixed);
-    std::cout << "d_vac  " << std::setw(20) << std::setprecision(10) << delta_vac << std::endl;
-    std::cout << "S'     " << std::setw(20) << std::setprecision(10) << S_  << std::endl;
-    std::cout << "X'     " << std::setw(20) << std::setprecision(10) << X_  << std::endl;
-#endif
-
-    Double_t lambda_s_ = TMath::Power(S_, 2) - 4. * px2 * m * m;
-    Double_t lambda_x_ = TMath::Power(X_, 2) - 4. * px2 * m * m;
-    if (lambda_s_ < 0.)
-        std::cout << "deltas: lambda_s' < 0 " << lambda_s_ << std::endl;
-    if (lambda_x_ < 0.)
-        std::cout << "deltas: lambda_x' < 0 " << lambda_x_ << std::endl;
-
-    Double_t l_m = TMath::Log(Q2 / (m * m));
-    Double_t Li_2 = HapradUtils::fspen(1. - px2 * Q2 / (S_ * X_));
-    Double_t delta_VR = 1.5 * l_m - 2. -
-            0.5 * TMath::Power(TMath::Log(X_ / S_),2) + Li_2 - kPi * kPi / 6.;
-
-    del_inf = (l_m - 1.) * TMath::Log(TMath::Power(px2 - kMassC2, 2) / S_ / X_);
-    delta   = del_inf + delta_vac + delta_VR;
-*/
-}
-
-
-
-Double_t TRadCor::VacPol(void)
-{
-/*
-    Double_t leptonMass[3] = { 0.26110  * TMath::Power(10,-6),
-                               0.111637 * TMath::Power(10,-1),
-                               3.18301 };
-
-    Double_t suml = 0;
-    for (Int_t i = 0; i < 3; ++i) {
-        Double_t a2    = 2. * leptonMass[i];
-        Double_t sqlmi = TMath::Sqrt(Q2 * Q2 + 2. * a2 * Q2);
-        Double_t allmi = TMath::Log((sqlmi + Q2) / (sqlmi - Q2)) / sqlmi;
-
-        suml = suml + 2. * (Q2 + a2) * allmi / 3. - 10. / 9. +
-                    4. * a2 * (1. - a2 * allmi) / 3. / Q2;
-    }
-
-    Double_t a, b, c;
-
-    if (Q2 < 1) {
-        a = -1.345 * TMath::Power(10,-9);
-        b = -2.302 * TMath::Power(10,-3);
-        c = 4.091;
-    } else if (Q2 < 64) {
-        a = -1.512 * TMath::Power(10,-3);
-        b = -2.822 * TMath::Power(10,-3);
-        c =  1.218;
-    } else {
-        a = -1.1344 * TMath::Power(10,-3);
-        b = -3.0680 * TMath::Power(10,-3);
-        c =  9.9992 * TMath::Power(10,-1);
-    }
-
-    Double_t sumh;
-    sumh = - (a + b * TMath::Log(1. + c * Q2)) * 2. * kPi / kAlpha;
-
-#ifdef DEBUG
-    std::cout << std::endl;
-    std::cout.setf(std::ios::fixed);
-    std::cout << "suml   " << std::setw(20) << std::setprecision(10) << suml  << std::endl;
-    std::cout << "sumh   " << std::setw(20) << std::setprecision(10) << sumh  << std::endl;
-    std::cout << std::endl;
-#endif
-
-    return suml + sumh;
-*/
-    return 0;
-}
 
 
 Double_t TRadCor::Bornin(void)
