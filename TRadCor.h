@@ -36,6 +36,11 @@ public:
     void        IntegratePhiHad(Int_t type = 0);
     void        SetPolarization(Int_t type = 0);
 
+    const TGlobalConfig*            GetConfig(void) const { return &fConfig; };
+    const TKinematicalVariables*    GetKinematicalVariables(void) const { return &fKin; };
+    const TLorentzInvariants*       GetLorentzInvariants(void) const { return &fInv; };
+    const THadronKinematics*        GetHadronKinematics(void) const { return &fHadKin; };
+
 private:
     void        Setup(void);
     void        Haprad(void);
