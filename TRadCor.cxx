@@ -2,8 +2,11 @@
 #include "THapradException.h"
 
 #include "TDelta.h"
+#include "TQQTPhi.h"
 #include "TBorn.h"
 #include "haprad_constants.h"
+
+#include "Math/GaussIntegrator.h"
 
 #include <iostream>
 #include <iomanip>
@@ -295,30 +298,24 @@ void TRadCor::SPhiH(void)
         it_end = 1;
     }
 
-    for (Int_t i = 1; i <= it_end; ++i) {
-        for (ita = 1; ita <= 2; ++ita) {
-            std::cout << "********** ita: " << ita
-                      << " *********" << std::endl;
-            if (ita == 1) {
-                TBorn fBornin(this);
-                sigma_born = fBornin.GetValue(N);
-                BorninTest(sibt);
-                std::cout << "sib1" << sigma_born << std::endl;
-                std::cout << "sibt" << sibt << std::endl;
-                if (sigma_born == 0.0) {
-                    tai[1] = 0.;
-                    continue;
-                }
-            }
-            qqt(tai[ita]);
-            std::cout << "tai[" << ita
-                      << "]\t"  << tai[ita] << std::endl;
-        }
-
-        Double_t extai1 = TMath::Exp(fDeltas.Inf());
-        sig_obs = sigma_born * extai1 * (1. + fDeltas.VR() + fDeltas.Vac()) +
-                                                            tai[1] + tai[2];
+    std::cout << "********** ita: " << ita
+            << " *********" << std::endl;
+    TBorn fBornin(this);
+    sigma_born = fBornin.GetValue(N);
+    BorninTest(sibt);
+    std::cout << "sib1" << sigma_born << std::endl;
+    std::cout << "sibt" << sibt << std::endl;
+    if (sigma_born == 0.0) {
+        tai[1] = 0.;
     }
+    std::cout << "tai[" << 1
+            << "]\t"  << tai[1] << std::endl;
+
+    qqt(tai[1]);
+
+    Double_t extai1 = TMath::Exp(fDeltas.Inf());
+    sig_obs = sigma_born * extai1 * (1. + fDeltas.VR() + fDeltas.Vac()) +
+                                                            tai[1] + tai[2];
 }
 
 
@@ -333,16 +330,20 @@ void TRadCor::BorninTest(Double_t& sigma_born)
 void TRadCor::qqt(Double_t& tai)
 {
     /*
-    Double_t sqrt_lq = TMath::Sqrt(TMath::Max(0., lambda_q));
-
     if (ita == 1) {
-        if (int_phi_rad == 1) {
-            // Integration using Simpson's rule
-//            simpsx(0, (2. * pi), 150, epsphir, qqtphi, tai);
-            tai = N * kAlpha * tai / (kPi * kPi) / 4. / sqrt_lq;
-        } else if (int_phi_rad == 0) {
-            tai = N * kAlpha / kPi * qqtphi(0) / 2 / sqrt_lq;
-        }
+    */
+
+    TQQTPhi qphi(this);
+    if (fConfig.IntegratePhiRad() == 1) {
+        ROOT::Math::GaussIntegrator ig;
+        ig.SetFunction(qphi,false);
+        ig.SetRelTolerance(eps_phir);
+        tai = ig.Integral(0, TMath::TwoPi());
+        tai = N * kAlpha * tai / (kPi * kPi) / 4. / fInv.SqrtLq();
+    } else if (fConfig.IntegratePhiRad() == 0) {
+        tai = N * kAlpha / kPi * qphi(0.) / 2 / fInv.SqrtLq();
+    }
+    /*
     } else {
         Double_t tau_1, tau_2;
         Double_t tau[6];
@@ -405,81 +406,5 @@ void TRadCor::qqt(Double_t& tai)
         }
 
         tai = - kAlpha / (64. * TMath::Power(kPi,5.) * sqrt_lq * M) * N * rere;
-    }
 */
-}
-
-
-
-Double_t TRadCor::qqtphi(Double_t phi)
-{
-/*
-    phi_rad = phi;
-
-    Double_t tau_1, tau_2;
-    Double_t tau[6];
-
-    tau_1 = - Q2 / S;
-    tau_2 =   Q2 / X;
-
-    tau[0] = tau_min;
-    tau[1] = tau_1 - 0.15 * (tau_1 - tau_min);
-    tau[2] = tau_1 + 0.15 * (tau_2 - tau_1);
-    tau[3] = tau_2 - 0.15 * (tau_2 - tau_1);
-    tau[4] = tau_2 + 0.15 * (tau_max - tau_2);
-    tau[5] = tau_max;
-
-//    Double_t ep = TMath::Power(1, -12);
-    Double_t res = 0;
-
-    for (Int_t i = 0; i < 6; i++) {
-        Double_t re;
-//        simptx(TMath::Log(xs + tar[i]) + ep, TMath::Log(xs + tar[i+1]) - ep, 100, epstau, rv2ln, re));
-        res = res + re;
-    }
-    return res;
-*/
-    return 0;
-}
-
-
-
-Double_t TRadCor::rv2ln(Double_t tauln)
-{
-    /*
-    Double_t tau, mu, factor;
-    Double_t tm[4][3];
-    tau = TMath::Exp(tauln) - Q2 / S_x;
-
-    Double_t sqrt_lq = TMath::Sqrt(TMath::Max(0., lambda_q));
-    Double_t costk, sintk;
-    costk = (S_x - M * M * tau) / sqrt_lq;
-
-    if (abs(costk) <= 1) {
-        sintk = TMath::Sqrt(1. - costk * costk);
-    } else {
-        std::cout << "     rv2ln: costk > 1 " << costk << std::endl;
-        sintk = 0;
-    }
-
-    mu = (E_h - p_l * costk - p_h * sintk * TMath::Cos(phi_rad - phi)) / M;
-    factor = 1. + tau - mu;
-
-    tails(tau, tm, mu);
-
-    Double_t sfm[4];
-    Double_t res = 0;
-
-    if (ita == 1) {
-        strf(0, 0, 0, sfm);
-//        Double_t rmin = TMath::Power(10, -8);
-//        Double_t rmax = (px2 - kMassC2) / factor;
-//        simpux(rmin, rmax, 100, epsrr, podinl, res);
-    } else if (ita == 2) {
-        res = podinl((px2 - M * M) / factor) / factor;
-    }
-
-    return res * (Q2 / S_x + tau);
-*/
-    return 0;
 }
