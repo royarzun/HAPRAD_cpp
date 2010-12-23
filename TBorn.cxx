@@ -5,6 +5,11 @@
 #include "THadronKinematics.h"
 #include "haprad_constants.h"
 
+#ifdef DEBUG
+#include <iostream>
+#include <iomanip>
+#endif
+
 
 TBorn::TBorn(const TRadCor* rc)
   : fH(rc)

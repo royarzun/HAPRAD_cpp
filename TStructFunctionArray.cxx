@@ -6,6 +6,11 @@
 #include "THapradUtils.h"
 #include "haprad_constants.h"
 
+#ifdef DEBUG
+#include <iostream>
+#include <iomanip>
+#endif
+
 //______________________________________________________________________________
 //
 // The function calculates deep inelastic (ita = 1), elastic (ita = 2),
@@ -27,6 +32,9 @@ TStructFunctionArray::TStructFunctionArray(const TRadCor* rc)
     fKin    = rc->GetKinematicalVariables();
     fInv    = rc->GetLorentzInvariants();
     fHadKin = rc->GetHadronKinematics();
+#ifdef DEBUG
+    std::cout << "  Structure Function " << std::endl;
+#endif
 }
 
 
@@ -37,6 +45,9 @@ TStructFunctionArray::TStructFunctionArray(Int_t n, const TRadCor* rc)
     fKin    = rc->GetKinematicalVariables();
     fInv    = rc->GetLorentzInvariants();
     fHadKin = rc->GetHadronKinematics();
+#ifdef DEBUG
+    std::cout << "  Structure Function " << std::endl;
+#endif
 }
 
 

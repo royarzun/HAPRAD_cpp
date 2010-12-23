@@ -4,7 +4,11 @@
 #include "THapradException.h"
 #include "TLorentzInvariants.h"
 #include "haprad_constants.h"
+
 #include <iostream>
+#ifdef DEBUG
+#include <iomanip>
+#endif
 
 
 THadronKinematics::THadronKinematics(const TRadCor* rc)

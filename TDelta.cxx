@@ -9,6 +9,11 @@
 #include "THapradUtils.h"
 #include "haprad_constants.h"
 
+#ifdef DEBUG
+#include <iostream>
+#include <iomanip>
+#endif
+
 
 TDelta::TDelta(const TRadCor* rc)
   : fVR(0), fInf(0), fVac(0)

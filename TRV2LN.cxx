@@ -20,6 +20,9 @@ TRV2LN::TRV2LN(const TRadCor* rc, double phi_k)
     fHadKin = rc->GetHadronKinematics();
 
     fH.Evaluate(0.,0.,0.);
+#ifdef DEBUG
+    std::cout << "  RV2LN " << std::endl;
+#endif
 }
 
 

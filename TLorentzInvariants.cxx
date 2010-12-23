@@ -8,6 +8,9 @@
 #include "haprad_constants.h"
 
 #include <iostream>
+#ifdef DEBUG
+#include <iomanip>
+#endif
 
 
 TLorentzInvariants::TLorentzInvariants(const TRadCor* rc)
@@ -148,7 +151,7 @@ void TLorentzInvariants::EvaluateV12(void)
 
 #ifdef DEBUG
     std::cout.setf(std::ios::fixed);
-    std::cout << "V1     " << std::setw(20) << std::setprecision(10) << V_1  << std::endl;
-    std::cout << "V2     " << std::setw(20) << std::setprecision(10) << V_2  << std::endl;
+    std::cout << "V1     " << std::setw(20) << std::setprecision(10) << fV1  << std::endl;
+    std::cout << "V2     " << std::setw(20) << std::setprecision(10) << fV2  << std::endl;
 #endif
 }

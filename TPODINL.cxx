@@ -14,6 +14,9 @@ TPODINL::TPODINL(const TRadCor* rc, double tau, double mu,
 {
     fRC     = rc;
     fInv    = rc->GetLorentzInvariants();
+#ifdef DEBUG
+    std::cout << "  PODINL " << std::endl;
+#endif
 }
 
 
