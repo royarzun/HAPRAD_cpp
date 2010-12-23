@@ -31,7 +31,7 @@ TStructFunctionArray::TStructFunctionArray(const TRadCor* rc)
 
 
 
-TStructFunctionArray::TStructFunctionArray(const TRadCor* rc, Int_t n)
+TStructFunctionArray::TStructFunctionArray(Int_t n, const TRadCor* rc)
   : TArrayD(n)
 {
     fKin    = rc->GetKinematicalVariables();
@@ -55,79 +55,78 @@ void TStructFunctionArray::Evaluate(Double_t tau, Double_t mu, Double_t R)
     const Double_t& M = kMassProton;
     const Double_t& m_h = kMassDetectedHadron;
 
-    Double_t tld_Q2  = fInv->Q2() + R * tau;
-    Double_t tld_t   = fKin->T() - R * (tau - mu);
-    Double_t tld_lq  = (fInv->Sx() - R) * (fInv->Sx() - R) + 4. * M * M * tld_Q2;
-    Double_t tld_px2 = fHadKin->Px2() - R * (1. + tau - mu);
-    Double_t phq     = (m_h * m_h - tld_Q2 - tld_t) / 2.;
+    Double_t tldQ2  = fInv->Q2() + R * tau;
+    Double_t tldSx  = fInv->Sx() - R ;
 
-    Double_t tld_nu  = (fInv->Sx() - R) / (2 * M);
-    Double_t aks     = tld_Q2 / (2 * M) / tld_nu;
-    Double_t zh      = fHadKin->Eh() / tld_nu;
-    Double_t tld_sq  = TMath::Sqrt(tld_Q2 + TMath::Power(tld_nu, 2));
-    Double_t tld_p_l = (fHadKin->Eh() * tld_nu - phq) / tld_sq;
-    Double_t tld_pt2 = TMath::Power(fHadKin->Ph(), 2) - TMath::Power(tld_p_l, 2);
+    Double_t tldLq  = tldSx * tldSx + 4. * M * M * tldQ2;
+    Double_t tldNu  = tldSx / (2 * M);
+
+    Double_t tldT   = fKin->T() - R * (tau - mu);
+
+    Double_t tldPx2 = fHadKin->Px2() - R * (1. + tau - mu);
+    Double_t PhQ    = (m_h * m_h - tldQ2 - tldT) / 2.;
+
+    Double_t tldX   = tldQ2 / (2 * M * tldNu);
+    Double_t tldZ   = fHadKin->Eh() / tldNu;
+
+    Double_t tld_sq = Sqrt(tldQ2 + tldNu * tldNu);
+    Double_t tldPl  = (fHadKin->Eh() * tldNu - PhQ) / tld_sq;
+    Double_t tldPt2 = Power(fHadKin->Ph(), 2) - Power(tldPl, 2);
 
 
-    const Double_t& e = kEpsMachine;
 
-    Double_t eps_nu = Sqrt(
-                Power(fInv->Sx() * e / (2 * M), 2) +
-                Power(R * e / (2 * M), 2) +
-                Power((fInv->Sx() - R) / (2 * M) * e, 2));
+    Double_t epsNu = kEpsMachine * Sqrt(Power(fHadKin->Nu(), 2) +
+                                        Power(fHadKin->Nu() - tldNu, 2) +
+                                        Power(tldNu, 2));
 
-    Double_t epst = Sqrt(
-                Power((fKin->T() * e), 2) +
-                Power(((tau - mu) * R * e), 2) +
-                Power((R * tau * e), 2) +
-                Power((R * mu * e), 2));
+    Double_t epsT = kEpsMachine * Sqrt(Power(fKin->T(), 2) +
+                                       Power((tau - mu) * R, 2) +
+                                       Power(R * tau, 2) +
+                                       Power(R * mu, 2));
 
-    Double_t epsphq = Sqrt(
-                Power((2 * m_h * m_h * e), 2) +
-                Power((tld_Q2 * e), 2) +
-                Power(epst, 2)
-                ) / 2;
+    Double_t epsPhq = Sqrt(Power(2 * m_h * m_h * kEpsMachine, 2) +
+                           Power(tldQ2 * kEpsMachine, 2) +
+                           Power(epsT, 2)) / 2;
 
-    Double_t epsq = 1. / 2. / Sqrt(tld_Q2 + tld_nu * tld_nu) *
-                Sqrt(Power((tld_Q2 * e), 2) +
-                        Power(2 * tld_nu * tld_nu * eps_nu, 2));
+    Double_t epsQ2 = Sqrt(Power(tldQ2 * kEpsMachine, 2) +
+                          Power(2 * tldNu * tldNu * epsNu, 2)) /
+                     (2. * Sqrt(tldQ2 + Power(tldNu, 2)));
 
-    Double_t epspl = Sqrt(
-                Power(fHadKin->Eh() * e * tld_nu / tld_sq, 2) +
-                Power(fHadKin->Eh() * eps_nu / tld_sq, 2) +
-                Power(epsphq / tld_sq, 2) +
-                    Power((fHadKin->Eh() * tld_nu - phq) /
-                        Power(tld_sq, 2) * epsq, 2));
+    Double_t epsPl = Sqrt(Power(fHadKin->Eh() * kEpsMachine * tldNu / tld_sq, 2) +
+                          Power(fHadKin->Eh() * epsNu / tld_sq, 2) +
+                          Power(epsPhq / tld_sq, 2) +
+                          Power((fHadKin->Eh() * tldNu - PhQ) /
+                                        Power(tld_sq, 2) * epsQ2, 2));
 
-    Double_t epspt2 = 2. * Sqrt(
-                Power(fHadKin->Ph(), 4) * Power(e, 2) +
-                Power(tld_p_l, 4) * Power(epspl, 2));
+    Double_t epsPt2 = 2. * Sqrt(Power(fHadKin->Ph(), 4) * Power(kEpsMachine, 2) +
+                                Power(tldPl, 4) * Power(epsPl, 2));
 
-    if (tld_pt2 >= 0 || (tld_pt2 * tld_pt2 - epspt2 * epspt2) <= 0) {
-        Double_t a = fInv->S() / (2 * M) * (fInv->S() / (2 * M) - fHadKin->Nu()) * tld_Q2 / fInv->Q2();
-        Double_t tlde = (tld_nu + TMath::Sqrt(TMath::Power(tld_nu, 2) + 4 * a)) / 2;
-        Double_t tldy = tld_nu / tlde;
+    if (tldPt2 >= 0 || (tldPt2 * tldPt2 - epsPt2 * epsPt2) <= 0) {
+        Double_t a = fInv->S() / (2 * M) *
+                     (fInv->S() / (2 * M) - fHadKin->Nu()) *
+                     tldQ2 / fInv->Q2();
+
+        Double_t tldE = 0.5 * (tldNu + Sqrt(Power(tldNu, 2) + 4 * a));
+        Double_t tldY = tldNu / tldE;
 
         Double_t H1z, H2z, H3z, H4z;
 
-        HapradUtils::SemiInclusiveModel(tld_Q2, aks, tldy, zh, tld_pt2, tld_px2,
-                                        tld_p_l, H1z, H2z, H3z, H4z);
+        HapradUtils::SemiInclusiveModel(tldQ2, tldX, tldY, tldZ, tldPt2,
+                                        tldPx2, tldPl, H1z, H2z, H3z, H4z);
 
         // Including kinematic shift due to photon emission
-        Double_t tld_sqrt_lq = TMath::Sqrt(tld_lq);
+        Double_t aa = tldNu * (tldZ - 2 * M * tldPl / Sqrt(tldLq)) / (2. * M * M);
 
-        Double_t aa = (fInv->Sx() - R) * (zh - 2 * M * tld_p_l / tld_sqrt_lq) / 2. / (M * M);
+        Double_t h1 = tldZ * (2. * tldQ2 * tldX * H1z - tldPt2 * H4z) /
+                    (M * tldQ2 * tldX);
 
-        Double_t h1 = zh * (2. * tld_Q2 * aks * H1z - tld_pt2 * H4z) /
-                    M / tld_Q2 / aks;
+        Double_t h2 = 2 * tldZ * (2 * tldX * (tldX * H2z + aa * H3z) * tldLq +
+                H4z * (aa * aa * tldLq - 2 * tldPt2 * tldQ2)) /
+                        M / tldX / tldQ2 / tldLq;
 
-        Double_t h2 = 2 * zh * (2 * aks * (aks * H2z + aa * H3z) * tld_lq +
-                H4z * (aa * aa * tld_lq - 2 * tld_pt2 * tld_Q2)) /
-                        M / aks / tld_Q2 / tld_lq;
+        Double_t h3 = 2 * H4z * tldZ / M / tldQ2 / tldX;
 
-        Double_t h3 = 2 * H4z * zh / M / tld_Q2 / aks;
-
-        Double_t h4 = -2 * zh * (aks * H3z + aa * H4z) / M / tld_Q2 / aks;
+        Double_t h4 = -2 * tldZ * (tldX * H3z + aa * H4z) / M / tldQ2 / tldX;
 
         fArray[0] = h1;
         fArray[1] = h2;

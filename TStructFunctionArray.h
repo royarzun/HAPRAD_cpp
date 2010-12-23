@@ -12,7 +12,7 @@ class THadronKinematics;
 class TStructFunctionArray : public TArrayD {
 public:
     TStructFunctionArray(const TRadCor* rc);
-    TStructFunctionArray(const TRadCor* rc, Int_t n);
+    TStructFunctionArray(Int_t n, const TRadCor* rc);
     ~TStructFunctionArray();
 
     void        Evaluate(Double_t tau, Double_t mu, Double_t R);
