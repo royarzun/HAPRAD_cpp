@@ -5,7 +5,7 @@
 #include "TLorentzInvariants.h"
 #include "TRV2LN.h"
 #include "haprad_constants.h"
-#include "Math/GaussIntegrator.h"
+#include "Math/GaussLegendreIntegrator.h"
 #ifdef DEBUG
 #include <iostream>
 #include <iomanip>
@@ -67,10 +67,11 @@ double TQQTPhi::DoEval(double phi) const
 #ifdef DEBUG
     std::cout << "  QQTPhi(" << phi << ")" << std::endl << std::endl;
 #endif
-    ROOT::Math::GaussIntegrator ig;
+    ROOT::Math::GaussLegendreIntegrator ig;
 
     TRV2LN rv2ln(fRC, phi);
     ig.SetFunction(rv2ln,false);
+    ig.SetNumberPoints(100);
     ig.SetRelTolerance(fConfig->EpsTau());
 
     double res = 0;

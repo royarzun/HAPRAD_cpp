@@ -8,7 +8,7 @@
 #include "TThetaMatrix.h"
 #include "haprad_constants.h"
 #include "TMath.h"
-#include "Math/GaussIntegrator.h"
+#include "Math/GaussLegendreIntegrator.h"
 #include <iostream>
 
 
@@ -70,10 +70,11 @@ double TRV2LN::DoEval(double tauln) const
     TThetaMatrix theta(fRC);
     theta.Evaluate(tau, mu, 1, fPhiK);
 
-    ROOT::Math::GaussIntegrator ig;
+    ROOT::Math::GaussLegendreIntegrator ig;
 
     TPODINL podinl(fRC, tau, mu, fH, theta);
     ig.SetFunction(podinl,false);
+    ig.SetNumberPoints(100);
     ig.SetRelTolerance(fConfig->EpsRR());
 
     Double_t rmin = TMath::Power(10, -8);
