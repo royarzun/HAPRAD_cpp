@@ -11,6 +11,7 @@ TQQTPhi::TQQTPhi(const TRadCor* rc)
 {
     fRC  = rc;
     fInv = rc->GetLorentzInvariants();
+    fKin = rc->GetKinematicalVariables();
 
     fTauMax = (fInv->Sx() + fInv->SqrtLq()) / (2. * kMassProton * kMassProton);
     fTauMin = - fInv->Q2() / (kMassProton * kMassProton) / fTauMax;
@@ -51,11 +52,11 @@ double TQQTPhi::DoEval(double phi) const
     ig.SetRelTolerance(0.01);
 
     double res = 0;
-    Double_t ep = TMath::Power(1, -12);
+    Double_t ep = TMath::Power(10, -12);
 
-    for (int i = 0; i < 6; i++) {
+    for (int i = 0; i < 5; i++) {
         double re = ig.Integral(TMath::Log(fKin->X() + fTauArray[i]) + ep,
-                                TMath::Log(fKin->X() + fTauArray[i]) + ep);
+                                TMath::Log(fKin->X() + fTauArray[i+1]) + ep);
         res = res + re;
     }
 
