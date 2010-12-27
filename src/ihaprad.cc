@@ -13,41 +13,41 @@ using namespace TMath;
 void ihaprad(Double_t& bmom, Int_t& ilepm, Int_t& iphi_radm, Double_t& epsphirm, Double_t& epstaum, Double_t& epsrrm, Double_t& xmas, Double_t& ymas, Double_t& zmas, Double_t& tmas, Double_t& phimas, Double_t& sib, Double_t& sig, Double_t& delinf, Double_t& delta, Double_t& tai[3])
 {
     Double_t epspl;
-    ipol = 0; //ipol - 1 -- long; 2 -- tran; 0 -- unpol <-- type of polarization
-    iphi_had = 0; //iphi_had - integration over phi_{had} (1) or not (0)
-    iphi_rad = iphi_radm; //iphi_rad - integration over phi_{rad} (1) or approximation (0)
-    ilep = ilepm; //ilep - registered lepton: 1 - electron, 2 - muon
-    epsphir = epsphirm; //relative accuracies of integration over phi_r (eq.3)
-    epstau = epstaum; //relative accuracies of integration over tau (eq.3)
-    epsrr = epsrrm; //relative accuracies of integration over R (eq.3)
+    ipol = 0; 
+    iphi_had = 0; 
+    iphi_rad = iphi_radm;
+    ilep = ilepm;  
+    epsphir = epsphirm;
+    epstau = epstaum; 
+    epsrr = epsrrm; 
 
-    isf1 = 1.; //DIFINED TAIL.H
-    isf2 = isf20; //DIFINED TAIL.H & HAPRAD_CONST.H isf20=4
-    isf3 = 1.; //DIFINED TAIL.H
-    un = 1.; //DIFINED TAIL.H
-    pl = 0.; //DIFINED TAIL.H
-    pn = 0.; //DIFINED TAIL.H
-    qn = 0.; //DIFINED TAIL.H
+    isf1 = 1.;
+    isf2 = isf20;
+    isf3 = 1.; 
+    un = 1.; 
+    pl = 0.; 
+    pn = 0.; 
+    qn = 0.;
 
     Double_t tmom = 0.; //tmom - momentum per nucleon
-    Double_t snuc = 2. * amp * bmom; // S=2k_{1}p
+    Double_t snuc = 2. * amp * bmom; 
 
-    xs = xmas; //DIFINED SXY.H
-    zdif = zmas; //DIFINED PHI.H
-    tdif = tmas; //DIFINED PHI.H
+    xs = xmas; 
+    zdif = zmas;
+    tdif = tmas;
 
     if (ymas > 0.) {
-        ys = ymas; //DIFINED SXY.H
-        Q2 = snuc * xs * ys; //DIFINED SXY.H Q2=xyS
+        ys = ymas;
+        Q2 = snuc * xs * ys; 
 
     } else {
-        Q2 = -ymas; // Q2
-        ys = Q2 / (snuc * xs); //DIFINED SXY.H Bjorken Q2 ???
+        Q2 = -ymas; 
+        ys = Q2 / (snuc * xs); 
 
     }
 
     Double_t yma = 1. / (1. + Power(amp, 2.) * xs / snuc); // Maximum Bjorken Q2 ???
-    amc2 = Power((amp + amhh), 2.); //DIFINED HAPRAD_CONST.H
+    amc2 = Power((amp + amhh), 2.); 
     Double_t ymi = (amc2 - Power(amp, 2.)) / (snuc * (1. - xs)); //minimum Bjorken Q2 ???
 
     if (ys > yma || ys < ymi || xs > 1. || xs < 0.) {
@@ -58,31 +58,31 @@ void ihaprad(Double_t& bmom, Int_t& ilepm, Int_t& iphi_radm, Double_t& epsphirm,
 
     }
 
-    conkin(snuc); //THE FUNCTION IS DEFINED HERE
-    ehad = anu * zdif; //DIFINED PHI.H energy of hadron E_{h}=Nu*Z_{h}
-    Double_t sqnuq = Sqrt(Power(anu, 2.) + Q2); //sqrt(Q^{2}+Nu^{2})
+    conkin(snuc); 
+    ehad = anu * zdif; 
+    Double_t sqnuq = Sqrt(Power(anu, 2.) + Q2); 
 
-    if (ehad < amhh) { // the energy of detected hadron can't be less that its mass
+    if (ehad < amhh) { 
         std::cout << " Warning! Wrong kinematics!!!! skip the point!" << std::endl;
         std::cout << " ehad =" << ehad << std::endl;
         return 0;
     }
 
-    pph = Sqrt(Power(ehad, 2.) - Power(amhh, 2.)); //DIFINED PHI.H detected hadron momentum
+    pph = Sqrt(Power(ehad, 2.) - Power(amhh, 2.));
 
     if (tdif > 0.) {
-        pth = tdif; //DIFINED PHI.H
+        pth = tdif; 
 
-        if (pph < pth) { //hadron'S momentum can't be less than transverse momentum
+        if (pph < pth) {
             std::cout << " Warning! Wrong kinematics!!!! skip the point!" << std::endl;
             std::cout << " pph =" << pph << std::endl;
             std::cout << " pth =" << pth << std::endl;
             return 0;
         }
     }
-    plh = Sqrt(Power(pph, 2.) - Power(pth, 2.)); //DIFINED PHI.H detected hadron'S longitudinal momentum
+    plh = Sqrt(Power(pph, 2.) - Power(pth, 2.)); 
 
-    if (pph > pth) an = an * sqrt_lq / 2. / amp / plh; //an DEFINED SXY.H
+    if (pph > pth) an = an * sqrt_lq / 2. / amp / plh; 
     else an = 0.;
 
     tdif = Power(amhh, 2.) - Q2 + 2. * (sqnuq * plh - anu * ehad);
@@ -93,9 +93,10 @@ void ihaprad(Double_t& bmom, Int_t& ilepm, Int_t& iphi_radm, Double_t& epsphirm,
 
 void deltas(Double_t &delta, Double_t &delinf, Double_t &tr)
 {
-//     sibor is born cross section with polarized initial
-//     lepton and polarized target
-//     siamm is contribution of anomalous magnetic moment.
+/*     sibor is born cross section with polarized initial
+ *     lepton and polarized target
+ *     siamm is contribution of anomalous magnetic moment.
+ *     */
     Double_t sqlxx;
     Double_t allss;
     Double_t allxx;
@@ -206,7 +207,7 @@ void bornin(Double_t& sibor)
     Double_t tm[8];
     Double_t hi2;
 
-    strf(0., 0., 0., sfm0); //llamada a strf
+    strf(0., 0., 0., sfm0); 
     hi2 = 0.25;
 
     tm[0] = Q2;
@@ -311,7 +312,7 @@ void qqt(Double_t& tai)
                 Int_t ma = 10 * mir;
                 //      Integracion de d01fce
                // d01fce(2, am, bm, mir, ma, rv2tr, ot, otr, 500, wrk, re, id);
-                write(*, '(1x,''tai:'',2i3,g15.6,f8.4,i9,i3)')ico, iph, re, otr, mir, id; // --->PENDIENTEEE
+               // write(*, '(1x,''tai:'',2i3,g15.6,f8.4,i9,i3)')ico, iph, re, otr, mir, id; // --->PENDIENTEEE
                 rere = rere + re;
             }
         }
@@ -356,7 +357,6 @@ Double_t rv2tr(Int_t ndim, Double_t *arg)
 
 void sffun(Double_t *sfm, Double_t q2, Double_t w2, Double_t t)
 {
-    //sfm[5]
     Double_t sffun;
     Double_t st, sl, stt, slt, sltp, sfm10, coetr;
     Double_t sqw2 = Sqrt(w2);
@@ -414,7 +414,7 @@ void sffun(Double_t *sfm, Double_t q2, Double_t w2, Double_t t)
     }
 
     if (sfm[2] != sfm[2]) {
-        std::cout << "sffun: " << coetr, st, sl, stt, slt, sltp, q2, lambda_q, S_x, sqw2, cspion, sxt, sqll << std::endl
+        std::cout << "sffun: " << coetr, st, sl, stt, slt, sltp, q2, lambda_q, S_x, sqw2, cspion, sxt, sqll << std::endl;
 
          }
          return;
@@ -422,7 +422,6 @@ void sffun(Double_t *sfm, Double_t q2, Double_t w2, Double_t t)
 
 Double_t qqtphi(Double_t phi)
 {
-    //se borro la varable tlm[4] por no ser utiñ para nada
     Double_t tar[6], re;
     extern Double_t rv2ln;
     phirad = phi;
@@ -442,10 +441,7 @@ Double_t qqtphi(Double_t phi)
     }
     return res;
 }
-/*****************************************************************************************************
-void tails() Ocupa como variable global a "ita" Q2 verifica su estado
 
-******************************************************************************************************/
 void tails(Double_t ta, Double_t *tm[][6], Double_t amu)
 {
     Double_t phka, phkb;
@@ -536,7 +532,6 @@ Double_t rv2ln(Double_t taln, Bool_t nonzero)
     Double_t rmin;
     Double_t rMax;
     Double_t res, rv, DSIMPS, aval, bval;
-//  Double_t vyv(0: 1000)// comentado dado que al parecer no se ocupa
     Bool_t nonzero;
     extern Double_t podinl;
     Double_t ta = Exp(taln) - Q2 / S_x;
@@ -597,7 +592,6 @@ Double_t rv2ln(Double_t taln, Bool_t nonzero)
 
 Double_t  podinl(Double_t r)
 {
-//
 //    integrand (over r )
     Double_t pp, pres, sfm[8], ta, d2kvir, rm
     Bool_t reget;
@@ -628,8 +622,6 @@ Double_t  podinl(Double_t r)
         }
     }
 
-//      print*,'podinl start ',isf1,isf2,isf3,i1(isf)+i2(isf)-1
-
     for (Int_t isf = 0 ; isf <= isf2; isf++) {
         for (Int_t irr = 0; irr <= (i1[isf] + i2[isf] - 2); irr++) {
             pp = sfm[isf];
@@ -637,7 +629,6 @@ Double_t  podinl(Double_t r)
 
             pres = pp * Power(r, (irr - 2)) / Power((Q2 + r * ta), 2);
             podinl = podinl - tm[isf][irr] * pres;
-//     if(irr.eq.1) print*,'pod: ',isf,irr,sfm0(isf),sfm(isf),pp,pres,r**(irr-2)
         }
     }
     return podinl;
@@ -645,13 +636,14 @@ Double_t  podinl(Double_t r)
 
 void strf(Double_t ta, Double_t d2kvir, Double_t rr, Double_t  * sfm)
 {
-//c
-//c     the programm calculates deep inelastic (ita=1),
-//c     elastic (ita=2), quasielastic (ita=3) structure functions
-//c     in kinematical point (ta,rr).
-//c    rr=S_x-tt,
-//c    ta=(t-Q2)/rr,
-//c    where tt=t+amf2-amp2, amf2 is invarint mass of final hadrons
+/*
+*   The programm calculates deep inelastic (ita=1),
+*   elastic (ita=2), quasielastic (ita=3) structure functions
+*   in kinematical point (ta,rr).
+*   rr=S_x-tt,
+*   ta=(t-Q2)/rr,
+*   where tt=t+amf2-amp2, amf2 is invarint mass of final hadrons
+*   */
     Double_t tldq2;
     Double_t tldtd;
     Double_t tldaly;
@@ -683,13 +675,10 @@ void strf(Double_t ta, Double_t d2kvir, Double_t rr, Double_t  * sfm)
     tldp22 = p22 - rr * (1. + ta - d2kvir);
     phq = (Power(amhh, 2) - tldq2 - tldtd) / 2.;
 
-//      print*,'---------------Begin-----------------'
-//      write(*,'(3f22.19)') S_x,rr,ap
     tldnu = (S_x - rr) / ap;
     aks = tldq2 / ap / tldnu;
     zh = ehad / tldnu;
     tldsq = Sqrt(tldq2 + Power(tldnu, 2));
-//c      tldplh =(tldtd + tldq2 - Power(amhad(ivec),2) + 2 * tldnu * ehad) / 2 / tldsq;
     tldplh = (ehad * tldnu - phq) / tldsq;
     tldpt2 = Power(pph, 2) - Power(tldplh, 2);
     epsnu = Sqrt(Power((S_x * epsmarch / ap), 2) + Power((rr * epsmarch / ap), 2) + Power(((S_x - rr) / ap * epsmarch), 2));
@@ -698,57 +687,14 @@ void strf(Double_t ta, Double_t d2kvir, Double_t rr, Double_t  * sfm)
     epsq = 1. / 2. / Sqrt(tldq2 + Power(tldnu, 2)) * Sqrt(Power((tldq2 * epsmarch), 2) + Power((2 * (tldnu, 2) * epsnu), 2));
     epspl = Sqrt(Power((ehad * epsmarch * tldnu / tldsq), 2) + Power((ehad * epsnu / tldsq), 2) + Power((epsphq / tldsq), 2) + Power(((ehad * tldnu - phq) / Power(tldsq, 2) * epsq), 2));
     epspt2 = 2. * Sqrt(Power(pph, 4) * Power(epsmarch, 2) + Power(tldplh, 4) * Power(epspl, 2));
-//c      print*,'pt2= ',tldpt2,epspt2,(tldpt2**2-epspt2**2),epspl,tldplh,pph
-//c      if(tldpt2.lt.0.d0) return
     if (tldpt2 < 0 && (Power(tldpt2, 2) - Power(epspt2, 2)) > 0) return;
 
-//c       b1=0.d0
-//c       b2=0.d0
-//c       b3=0.d0
-//c       b4=0.d0
-//c print *,'q2',tldq2
-//c Call semi-inclusive model (H_i defined in Mulders)
-
-//c      dum=tldq2/ap/aks
-//c      if(tldnu.ne.dum) then
-//c      print*,'redefine'
-//c      aks=tldq2/ap/tldnu
-//c      zh=ehad/tldnu
-//c      tldsq=sqrt(tldq2+tldnu**2)
-//c      tldplh=(ehad*tldnu-phq)/tldsq
-//c      tldpt2=pph**2-tldplh**2
-//c      if(tldpt2.lt.0.d0) return
-//c      write(*,'(10f22.19)') tldq2,aks,zh,tldpt,tldnu,Ehad,pph,
-//c     &dum,(tldq2/ap/tldnu),(zh*tldnu)
-//c      endif
-
-//c      write(*,'(10f22.19)') tldq2,aks,zh,tldpt,tldnu,Ehad,pph,
-//c     &dum,(tldq2/ap/tldnu),(zh*tldnu)
-
-//c Recover Q2
     Double_t a = S / ap * (S / ap - anu) * tldq2 / Q2;
     Double_t tlde = (tldnu + Sqrt(Power(tldnu, 2) + 4 * a)) / 2;
     Double_t tldy = tldnu / tlde;
 
     semi_inclusive_model(tldq2, aks, tldy, zh, tldpt2, tldp22, tldplh, H1z, H2z, H3z, H4z);
-//c       print*,'----------------------------------------------'
 
-//c      print*,'Hs ',tldq2,aks,zh,tldpt,H1z,H2z,H3z,H4z
-
-//c print*,'semi-inclusive'
-//c print*,Eb,tldq2,aks,zh,sqrt(tldpt2)
-//c print*,H1z,H2z,H3z,H4z
-
-
-//c No photon emission (k-->0)
-//c      aa=S_x*(zdif-2.*amp*plh/sqrt_lq)/2.d0/amp2
-//c h(1)=  zdif*(2.d0*Q2*xs*sfm0(1)-pth**2*sfm0(4))/amp/Q2/xs
-//c h(2)=2.*zdif*(2.*xs*(xs*sfm0(2)+aa*sfm0(3))*lambda_q
-//c     . +sfm0(4)*(aa**2*lambda_q-2.*pth**2*Q2))/amp/xs/Q2/lambda_q
-//c        h(3)=2.*sfm0(4)*zdif/amp/Q2/xs
-//c h4=-2.*zdif*(xs*sfm0(3)+aa*sfm0(4))/amp/Q2/xs
-
-//c Including kinematic shift due to photon emission
     Double_t epsi = ap2 / (S_x - rr);
     Double_t aa = (S_x - rr) * (zh - 2 * amp * tldplh / tldsqly) / 2. / amp2;
     Double_t h1 = zh * (2. * tldq2 * aks * h1z - tldpt2 * h4z) / amp / tldq2 / aks;
@@ -756,21 +702,10 @@ void strf(Double_t ta, Double_t d2kvir, Double_t rr, Double_t  * sfm)
     Double_t h3 = 2 * h4z * zh / amp / tldq2 / aks;
     Double_t h4 = -2 * zh * (aks * h3z + aa * h4z) / amp / tldq2 / aks;
 
-//c      print*,epsi,aa,h1,h2,h3,h4
-
-
     sfm[0] = un * h1;
     sfm[1] = un * h2;
     sfm[2] = un * h3;
     sfm[3] = un * h4;
-//c      sfm(5)=epsi**2*b1
-//c      sfm(6)=epsi**3*(b2/3.d0+b3+b4)
-//c      sfm(7)=epsi*(b2/3.d0-b3)
-//c      sfm(8)=epsi**2*(b2/3.d0-b4)
-
-
-//c      print*,'strf: ',tldq2,aks,zh,tldpt2,tldpt,H1z,H2z,H3z,H4z,
-//c     &tldnu,S_x,ap,ehAD
 
     return;
 }
