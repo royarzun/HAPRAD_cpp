@@ -1,51 +1,46 @@
-HAPRAD
-======
+Radiative Correction of Hadron Leptoproduction
+==============================================
 
-FORTRAN program for calculation of radiative correction to semi-inclusive
-hadron leptoproduction 
+C++ program for calculation of radiative correction to semi-inclusive hadron
+leptoproduction, based in the original FORTRAN code HAPRAD2_.
 
-:Authors: I. Akushevich,
-          A. Ilyichev and
-          M. Osipenko
+.. _HAPRAD2: https://github.com/usm-data-analysis/HAPRAD_cpp/
+             tree/master/haprad2
 
-:Version: 2.0
+:Authors: H. Hakobyan,
+          R. Oyarzun and
+          S. Mancilla
 
-==========================   ====================================================
-``rcdat.f``                  the main program
-``rcdat_test.f``             the main program for test
-``fhaprad.f``                the program for parameter initialization
-``fhaprad_test.f``           the program for test parameter initialization
-``ihaprad.f``                the basic program of calculation
-``exclusive_model.f``        the program for exclusive cross sections calculation 
-``semi_inclusive_model.f``   the program for semi-inclusive structure functions
-                             calculation
-``h3.f``                     the program for semi-inclusive H3 structure
-                             function calculation
-``h4.f``                     the program for semi-inclusive H4 structure
-                             function calculation  
-``haprad_utils.f``           includes some subroutines and function that are
-                             necessary for calculation   
-``init_pdf.f``               parton distribution initialization
-``pkhff.f``                  LO and NLO fragmentation functions for charged
-                             pions, kaons and the inclusive sum of charged
-                             hadrons 
-``res.dat``                  output file
-``test.dat``                 test output file
-==========================   ====================================================
- 
-For radiative  correction calculation run::
+==========================  ==================================================
+``TRadCor``                 the main class
+``TGlobalConfig``           class storing global configurations
+``TKinematicalVariables``   class storing the input data (the five kinematical
+                            variables describing the cross section)
+``TLorentzInvariants``      class storing the used Lorentz invariants
+``THadronKinematics``       class storing non-invariants variables describing
+                            kinematics of detected hadron
+``TDelta``                  class that calculates the deltas according to the
+                            Eq. (19) of [Aku99]_
+``TBorn``                   class that calculates the Born cross section
+``TStructFunctionArray``    class for calculation of structure functions
+``TThetaMatrix``            class for calculation of theta matrix, according
+                            to Eq. (14) and Appendix B of [Aku09]_
+``TPODINL``                 ROOT based integrable class equivalent to
+                            original FORTRAN function ``podinl``
+``TRV2LN``                  ROOT based integrable class equivalent to
+                            original FORTRAN function ``rv2ln``
+``TQQTPhi``                 ROOT based integrable class equivalent to
+                            original FORTRAN function ``qqtphi``
+``THapradUtils``            several functions used for calculations, including
+                            exclusive cross section calculation and
+                            semi-inclusive structure functions calculation
+==========================  ==================================================
 
-    $ make
-    $ ./haprad20.exe
+See the wiki_ for more information.
 
-Test-run reproduce relative exclusive radiative tail contribution at different
-phih to the observed cross section for the kinematical points of ref [Avakian04]_.
+.. _wiki: https://github.com/usm-data-analysis/HAPRAD_cpp/wiki
 
-For test calculation run::
-
-    $ make test
-    $ ./test.exe
-
-.. [Avakian04] H. Avakian *et al.* (CLAS Collaboration), Measurement of
-               beam-spin asymmetries for pi plus electroproduction above the
-               baryon resonance region, *Phys. Rev. D 69* 112004 (2004).
+.. [Aku99] I. Akushevich, N. Shumeiko, A. Soroko,
+           Eur. Phys. J. C 10 (1999) 681
+.. [Aku09] I. Akushevich, A. Ilyichev, M. Osipenko,
+           Physics Letters B 672 (2009) 35-44
