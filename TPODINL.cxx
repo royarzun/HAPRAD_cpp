@@ -5,7 +5,6 @@
 #include "TStructFunctionArray.h"
 #include "TThetaMatrix.h"
 #include "haprad_constants.h"
-#include "Math/GaussIntegrator.h"
 #ifdef DEBUG
 #include <iostream>
 #include <iomanip>
@@ -41,7 +40,6 @@ ROOT::Math::IBaseFunctionOneDim* TPODINL::Clone() const
 
 double TPODINL::DoEval(double R) const
 {
-    double pp, pres;
 #ifdef DEBUG
     std::cout << "      PODINL(" << R << ")" << std::endl;
 #endif
@@ -49,7 +47,9 @@ double TPODINL::DoEval(double R) const
     TStructFunctionArray H(fRC);
     H.Evaluate(fTau, fMu, R);
 
-    double podinl = 0;
+    double pp = 0.;
+    double pres = 0.;
+    double podinl = 0.;
     for (int isf = 0 ; isf < 4; isf++) {
         for (int irr = 0; irr < 2; irr++) {
             pp = H[isf];
