@@ -366,7 +366,7 @@ namespace HapradUtils {
                                 };
 
         Int_t narg[3] = {nq, nw, nt};
-        Double_t nc = 0;
+        Double_t nc;
         Double_t degrad = 57.29577952;
         Double_t a2 = 1.15;
         Double_t a3;
@@ -376,6 +376,7 @@ namespace HapradUtils {
         Double_t wcor;
         Double_t th_cm;
 // Init
+        nc = 0;
         st = 0.0;
         sl = 0.0;
         stt = 0.0;
@@ -402,10 +403,11 @@ namespace HapradUtils {
         if (w < 1.07784) return;
 
         if (w > 2) {
+            a3 = a30 + a31 * th_cm;
+
             if (th_cm < 50.0) a3 = a30 + a31 * 50.;
             if (th_cm > 100.0) a3 = a30 + a31 * 100.;
-
-            a3 = a30 + a31 * th_cm;
+            
             wcor = TMath::Power(2., a3) / TMath::Power(w, a3);
             w = 2.;
 
