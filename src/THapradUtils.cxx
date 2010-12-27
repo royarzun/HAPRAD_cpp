@@ -7,10 +7,7 @@
 #include "TMath.h"
 #include "TROOT.h"
 
-/*
- *This segment of code is for calling the fortran functions related
- *to the pdf generation and initialization using the cernlibs. 
- * */
+//#define N 100000;
 
 extern "C" {
     void init_pdf_(int&, int&);
@@ -252,7 +249,7 @@ namespace HapradUtils {
         Double_t dfint;
         while (i <= narg) {
             ncomb[i] = 1;
-            jb = ja + nent[i]; 
+            jb = ja + nent[i]; // VERIFICAR SI LOS LIMITES ESTAN CORRECTOS!!!!
             Int_t j = ja;
             Int_t jr;
             while (j <= jb) {
