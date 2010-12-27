@@ -1,15 +1,6 @@
 #ifndef HAPRAD_CONSTANTS_H
 #define HAPRAD_CONSTANTS_H
 
-#ifdef __GNUC__
-    #define MAYBE_UNUSED __attribute__((used))
-#elif defined _MSC_VER
-    #pragma warning(disable: Cxxxxx)
-    #define MAYBE_UNUSED
-#else
-    #define MAYBE_UNUSED
-#endif
-
 #include "TMath.h"
 
 
