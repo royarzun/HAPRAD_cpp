@@ -75,11 +75,6 @@ private:
     Double_t     pl;
     Int_t        ita;
     Double_t     phi_rad;
-
-    // Epsilons
-    Double_t     eps_phir;
-    Double_t     eps_tau;
-    Double_t     eps_rr;
 };
 
 #endif

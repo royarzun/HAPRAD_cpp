@@ -4,6 +4,7 @@
 #include "Math/IFunction.h"
 
 class TRadCor;
+class TGlobalConfig;
 class TKinematicalVariables;
 class TLorentzInvariants;
 
@@ -19,6 +20,7 @@ private:
     virtual double DoEval(double phi) const;
 
     const TRadCor*                  fRC;
+    const TGlobalConfig*            fConfig;
     const TKinematicalVariables*    fKin;
     const TLorentzInvariants*       fInv;
 

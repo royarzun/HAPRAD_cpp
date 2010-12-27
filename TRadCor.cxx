@@ -15,8 +15,7 @@ TRadCor::TRadCor()
 : fInv(this), fHadKin(this),
   maxMx2(0.), Mx2(0.),
   sigma_born(0.), sig_obs(0.), tail(0.),
-  M(kMassProton), m(kMassElectron), m_h(kMassDetectedHadron),
-  eps_phir(0.01), eps_tau(0.001), eps_rr(0.001)
+  M(kMassProton), m(kMassElectron), m_h(kMassDetectedHadron)
 {
     // Default constructor
 }
@@ -28,8 +27,7 @@ TRadCor::TRadCor(Double_t E, Double_t x, Double_t Q2, Double_t z,
 : fInv(this), fHadKin(this),
   maxMx2(0.), Mx2(0.),
   sigma_born(0.), sig_obs(0.), tail(0.),
-  M(kMassProton), m(kMassElectron), m_h(kMassDetectedHadron),
-  eps_phir(0.01), eps_tau(0.001), eps_rr(0.001)
+  M(kMassProton), m(kMassElectron), m_h(kMassDetectedHadron)
 {
     // Normal constructor for a radiative correction object
     //
@@ -340,7 +338,7 @@ void TRadCor::qqt(Double_t& tai)
     if (fConfig.IntegratePhiRad() == 1) {
         ROOT::Math::GaussIntegrator ig;
         ig.SetFunction(qphi,false);
-        ig.SetRelTolerance(eps_phir);
+        ig.SetRelTolerance(fConfig.EpsPhiR());
         tai = ig.Integral(0, TMath::TwoPi());
         tai = N * kAlpha * tai / (kPi * kPi) / 4. / fInv.SqrtLq();
     } else if (fConfig.IntegratePhiRad() == 0) {

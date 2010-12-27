@@ -1,5 +1,6 @@
 #include "TQQTPhi.h"
 #include "TRadCor.h"
+#include "TGlobalConfig.h"
 #include "TKinematicalVariables.h"
 #include "TLorentzInvariants.h"
 #include "TRV2LN.h"
@@ -14,6 +15,7 @@
 TQQTPhi::TQQTPhi(const TRadCor* rc)
 {
     fRC  = rc;
+    fConfig = rc->GetConfig();
     fInv = rc->GetLorentzInvariants();
     fKin = rc->GetKinematicalVariables();
 
@@ -69,7 +71,7 @@ double TQQTPhi::DoEval(double phi) const
 
     TRV2LN rv2ln(fRC, phi);
     ig.SetFunction(rv2ln,false);
-    ig.SetRelTolerance(0.01);
+    ig.SetRelTolerance(fConfig->EpsTau());
 
     double res = 0;
     Double_t ep = TMath::Power(10, -12);

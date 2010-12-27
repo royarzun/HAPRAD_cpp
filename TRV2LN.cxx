@@ -1,5 +1,6 @@
 #include "TRV2LN.h"
 #include "TRadCor.h"
+#include "TGlobalConfig.h"
 #include "TKinematicalVariables.h"
 #include "TLorentzInvariants.h"
 #include "THadronKinematics.h"
@@ -15,6 +16,7 @@ TRV2LN::TRV2LN(const TRadCor* rc, double phi_k)
   : fH(rc), fPhiK(phi_k)
 {
     fRC     = rc;
+    fConfig = rc->GetConfig();
     fKin    = rc->GetKinematicalVariables();
     fInv    = rc->GetLorentzInvariants();
     fHadKin = rc->GetHadronKinematics();
@@ -72,7 +74,7 @@ double TRV2LN::DoEval(double tauln) const
 
     TPODINL podinl(fRC, tau, mu, fH, theta);
     ig.SetFunction(podinl,false);
-    ig.SetRelTolerance(0.001);
+    ig.SetRelTolerance(fConfig->EpsRR());
 
     Double_t rmin = TMath::Power(10, -8);
     Double_t rmax = (fHadKin->Px2() - kMassC2) / factor;
