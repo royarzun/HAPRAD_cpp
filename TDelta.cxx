@@ -1,14 +1,11 @@
 #include "TDelta.h"
-
 #include "TRadCor.h"
 #include "TGlobalConfig.h"
 #include "TKinematicalVariables.h"
 #include "TLorentzInvariants.h"
 #include "THadronKinematics.h"
-
 #include "THapradUtils.h"
 #include "haprad_constants.h"
-
 #ifdef DEBUG
 #include <iostream>
 #include <iomanip>
@@ -55,8 +52,10 @@ void TDelta::Evaluate(void)
 
 #ifdef DEBUG
     std::cout.setf(std::ios::fixed);
-    std::cout << "S'     " << std::setw(20) << std::setprecision(10) << S_  << std::endl;
-    std::cout << "X'     " << std::setw(20) << std::setprecision(10) << X_  << std::endl;
+    std::cout << "S'     " << std::setw(20) << std::setprecision(10)
+              << S_  << std::endl;
+    std::cout << "X'     " << std::setw(20) << std::setprecision(10)
+              << X_  << std::endl;
 #endif
 
     Double_t l_m  = Log(fInv->Q2() / (m * m));

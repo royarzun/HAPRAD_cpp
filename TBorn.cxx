@@ -42,10 +42,14 @@ Double_t TBorn::GetValue(Double_t N)
         sum = sum + fThetaB[i] * fH[i];
 #ifdef DEBUG
         std::cout.setf(std::ios::fixed);
-        std::cout << "    i         " << std::setw(20) << std::setprecision(10) << i          << std::endl;
-        std::cout << "    theta^B_i " << std::setw(20) << std::setprecision(10) << fThetaB[i] << std::endl;
-        std::cout << "    H[i]      " << std::setw(20) << std::setprecision(10) << fH[i]      << std::endl;
-        std::cout << "    sum       " << std::setw(20) << std::setprecision(10) << sum        << std::endl;
+        std::cout << "    i         " << std::setw(20) << std::setprecision(10)
+                  << i << std::endl;
+        std::cout << "    theta^B_i " << std::setw(20) << std::setprecision(10)
+                  << fThetaB[i] << std::endl;
+        std::cout << "    H[i]      " << std::setw(20) << std::setprecision(10)
+                  << fH[i] << std::endl;
+        std::cout << "    sum       " << std::setw(20) << std::setprecision(10)
+                  << sum << std::endl;
 #endif
     }
 

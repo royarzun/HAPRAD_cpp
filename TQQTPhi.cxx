@@ -5,6 +5,10 @@
 #include "TRV2LN.h"
 #include "haprad_constants.h"
 #include "Math/GaussIntegrator.h"
+#ifdef DEBUG
+#include <iostream>
+#include <iomanip>
+#endif
 
 
 TQQTPhi::TQQTPhi(const TRadCor* rc)
@@ -15,9 +19,22 @@ TQQTPhi::TQQTPhi(const TRadCor* rc)
 
     fTauMax = (fInv->Sx() + fInv->SqrtLq()) / (2. * kMassProton * kMassProton);
     fTauMin = - fInv->Q2() / (kMassProton * kMassProton) / fTauMax;
+#ifdef DEBUG
+    std::cout.setf(std::ios::fixed);
+    std::cout << "  tau_max  " << std::setw(20) << std::setprecision(10)
+              << fTauMax << std::endl;
+    std::cout << "  tau_min  " << std::setw(20) << std::setprecision(10)
+              << fTauMin << std::endl;
+#endif
 
     double tau_1 = - fInv->Q2() / fInv->S();
     double tau_2 =   fInv->Q2() / fInv->X();
+#ifdef DEBUG
+    std::cout << "  tau_1  " << std::setw(20) << std::setprecision(10)
+              << tau_1 << std::endl;
+    std::cout << "  tau_2  " << std::setw(20) << std::setprecision(10)
+              << tau_2 << std::endl;
+#endif
 
     fTauArray[0] = fTauMin;
     fTauArray[1] = tau_1 - 0.15 * (tau_1 - fTauMin);
@@ -45,6 +62,9 @@ ROOT::Math::IBaseFunctionOneDim* TQQTPhi::Clone() const
 
 double TQQTPhi::DoEval(double phi) const
 {
+#ifdef DEBUG
+    std::cout << "  QQTPhi(" << phi << ")" << std::endl << std::endl;
+#endif
     ROOT::Math::GaussIntegrator ig;
 
     TRV2LN rv2ln(fRC, phi);
@@ -55,8 +75,22 @@ double TQQTPhi::DoEval(double phi) const
     Double_t ep = TMath::Power(10, -12);
 
     for (int i = 0; i < 5; i++) {
+#ifdef DEBUG
+        std::cout.setf(std::ios::fixed);
+        std::cout << "  i: " << i << std::endl;
+        std::cout << "   lim1 "
+                  << std::setw(20) << std::setprecision(10)
+                  << TMath::Log(fKin->X() + fTauArray[i]) + ep << std::endl;
+        std::cout << "   lim2 "
+                  << std::setw(20) << std::setprecision(10)
+                  << TMath::Log(fKin->X() + fTauArray[i+1]) + ep << std::endl;
+#endif
         double re = ig.Integral(TMath::Log(fKin->X() + fTauArray[i]) + ep,
                                 TMath::Log(fKin->X() + fTauArray[i+1]) + ep);
+#ifdef DEBUG
+        std::cout << "   re   " << std::setw(20) << std::setprecision(10)
+                  << re << std::endl;
+#endif
         res = res + re;
     }
 

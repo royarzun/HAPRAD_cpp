@@ -1,15 +1,14 @@
 #include "TRadCor.h"
 #include "THapradException.h"
-
 #include "TDelta.h"
 #include "TQQTPhi.h"
 #include "TBorn.h"
 #include "haprad_constants.h"
-
 #include "Math/GaussIntegrator.h"
-
 #include <iostream>
+#ifdef DEBUG
 #include <iomanip>
+#endif
 
 
 TRadCor::TRadCor()
@@ -237,7 +236,9 @@ void TRadCor::Haprad(void)
 
     N = kPi * TMath::Power(kAlpha,2) * fKin.Y() * fInv.Sx() * M / 2. / fInv.SqrtLq() * kBarn;
 #ifdef DEBUG
-    std::cout << "N      " << std::setw(20) << std::setprecision(10) << N << std::endl;
+    std::cout.setf(std::ios::fixed);
+    std::cout << "N      " << std::setw(20)
+                           << std::setprecision(10) << N << std::endl;
 #endif
 
     if (fKin.T() >= 0.) {
@@ -254,11 +255,13 @@ void TRadCor::Haprad(void)
                   << fHadKin.Pl() - t + fInv.Q2() - m_h * m_h + 2. * fHadKin.Nu() * fHadKin.Eh() / 2. / fHadKin.SqNuQ()
                   << std::endl;
     }
-
 #ifdef DEBUG
-    std::cout << "Pt     " << std::setw(20) << std::setprecision(10) << fHadKin.Pt() << std::endl;
-    std::cout << "Pl     " << std::setw(20) << std::setprecision(10) << fHadKin.Pl() << std::endl;
-    std::cout << "tdif   " << std::setw(20) << std::setprecision(10) << fKin.T() << std::endl;
+    std::cout << "Pt     " << std::setw(20) << std::setprecision(10)
+                           << fHadKin.Pt() << std::endl;
+    std::cout << "Pl     " << std::setw(20) << std::setprecision(10)
+                           << fHadKin.Pl() << std::endl;
+    std::cout << "tdif   " << std::setw(20) << std::setprecision(10)
+                           << fKin.T() << std::endl;
 #endif
 
     fInv.EvaluateV12();

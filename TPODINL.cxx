@@ -6,6 +6,10 @@
 #include "TThetaMatrix.h"
 #include "haprad_constants.h"
 #include "Math/GaussIntegrator.h"
+#ifdef DEBUG
+#include <iostream>
+#include <iomanip>
+#endif
 
 
 TPODINL::TPODINL(const TRadCor* rc, double tau, double mu,
@@ -38,6 +42,9 @@ ROOT::Math::IBaseFunctionOneDim* TPODINL::Clone() const
 double TPODINL::DoEval(double R) const
 {
     double pp, pres;
+#ifdef DEBUG
+    std::cout << "      PODINL(" << R << ")" << std::endl;
+#endif
 
     TStructFunctionArray H(fRC);
     H.Evaluate(fTau, fMu, R);
@@ -50,6 +57,17 @@ double TPODINL::DoEval(double R) const
 
             pres = pp * TMath::Power(R, (irr - 1)) / TMath::Power((fInv->Q2() + R * fTau), 2);
             podinl = podinl - fTheta[isf][irr] * pres;
+#ifdef DEBUG
+            std::cout << "      pp:     " << std::setw(20)
+                                          << std::setprecision(10)
+                                          << pp << std::endl;
+            std::cout << "      pres:   " << std::setw(20)
+                                          << std::setprecision(10)
+                                          << pres << std::endl;
+            std::cout << "      podinl: " << std::setw(20)
+                                          << std::setprecision(10)
+                                          << podinl << std::endl;
+#endif
         }
     }
     return podinl;
