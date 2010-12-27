@@ -7,8 +7,11 @@
 #include "TMath.h"
 #include "TROOT.h"
 
-//#define N 100000;
-
+/*
+ *This C extern declaration is used for calling the pdf libraries
+ *form the Cern Libs directly using the previous fortran code.
+ *
+ */
 extern "C" {
     void init_pdf_(int&, int&);
 
