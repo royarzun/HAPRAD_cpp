@@ -1,11 +1,13 @@
 #include "THapradUtils.h"
-#include "TMath.h"
+#include "haprad_constants.h"
+#include "Partons.h"
 #include <iostream>
 #include <string>
-#include "TMath.h"
-#include "TRoot.h"
 
-#define N 100000;
+#include "TMath.h"
+#include "TROOT.h"
+
+//#define N 100000;
 
 extern "C" {
     void init_pdf_(int&, int&);
@@ -13,11 +15,52 @@ extern "C" {
     void exec_structm_(double&, double&, double&, double&, double&, double&,
                        double&, double&, double&, double&, double&);
 
-    void exec_pkhff(int&, int&, double&, double&, double*, double*, double*,
-                    double*, double*, double*);
+    void exec_pkhff_(int&, int&, double&, double&, double*, double*, double*,
+                     double*, double*, double*);
 }
 
 namespace HapradUtils {
+    using namespace TMath;
+
+    Double_t h3(Double_t X, Double_t q2, Double_t Z)
+    {
+        /* InitialiZed data */
+        Double_t q0 = 1.;
+        Double_t lambda = .25;
+        Double_t a = -3.6544e-4;
+        Double_t a1 = -2.1855;
+        Double_t a2 = 3.4176;
+        Double_t b1 = -1.7567;
+        Double_t b2 = 1.1272;
+        Double_t bb = 8.9985;
+        if (q2 > q0) {
+            return a * Power(X, a1) * Power((1 - X), a2) * Power(Z, b1) * Power((1 - Z), b2) * Power((Log(q2 / Power(lambda, 2))) / Power(Log(q0 / Power(lambda, 2)), 2), bb);
+        } else {
+            return a * Power(X, a1) * Power((1 - X), a2) * Power(Z, b1) * Power((1 - Z), b2);
+        }
+
+    }
+
+    Double_t h4(Double_t X, Double_t q2, Double_t Z)
+    {
+        /* InitialiZed data */
+        Double_t q0 = 1.;
+        Double_t lambda = .25;
+        Double_t a = .0010908;
+        Double_t a1 = -3.5265e-7;
+        Double_t a2 = 3.0276e-8;
+        Double_t b1 = -.66787;
+        Double_t b2 = 3.5868;
+        Double_t bb = 6.8777;
+
+        if (q2 > q0) {
+            return a * Power(X, a1) * Power((1. - X), a2) * Power(Z, b1) * Power((1. - Z), b2) * Power(Log(q2 / Power(lambda, 2)) / Log(q0 / Power(lambda, 2)), (bb / X));
+        } else {
+            return a * Power(X, a1) * Power((1. - X), a2) * Power(Z, b1) * Power((1. - Z), b2);
+        }
+    }
+
+
 
     Double_t fspen(const Double_t x)
     {
@@ -86,7 +129,7 @@ namespace HapradUtils {
         Double_t dc = 6.5397 * Power(10, -2);
         Double_t ec = -2.2136 * Power(10, -1);
         Double_t fc = -1.0621 * Power(10, -1);
-        Double_t GTMD, SCALE, UPV, DNV, USEA, DSEA, STR, CHM, BOT, TOP, GD, XD, GL;
+        Double_t GTMD, SCALE, UPV, DNV, USEA, DSEA, STR, CHM, BOT, TOP, XD, GL;
         Double_t r, xi;
         Int_t GPDF = 5;
         Int_t SPDF = 5;
@@ -194,7 +237,7 @@ namespace HapradUtils {
     }
 
 
-    void dfint(Int_t narg, Double_t *arg, Double_t *nent, Double_t *ent, Double_t *table)
+    Double_t dfint(Int_t narg, double *arg, Int_t *nent, Double_t *ent, Double_t *table)
     {
         Double_t kd = 1;
         Double_t m = 1;
@@ -202,18 +245,20 @@ namespace HapradUtils {
         Int_t ja = 0;
         Int_t jb, k;
         Int_t i = 0;
-
+        Double_t d[narg];
+        Double_t dfint;
         while (i <= narg) {
             ncomb[i] = 1;
             jb = ja + nent[i]; // VERIFICAR SI LOS LIMITES ESTAN CORRECTOS!!!!
             Int_t j = ja;
+            Int_t jr;
             while (j <= jb) {
                 if (arg[i] <= ent[j]) {
                     if (j != ja) {
                         jr = j - 1;
                         d[i] = (ent[j] - arg[i]) / (ent[j] - ent[jr]);
-                        ient[i] = j - ja;
-                        kd = kd + ient[i] * m;
+                        ent[i] = j - ja;
+                        kd = kd + ent[i] * m;
                         m = m * nent[i];
                         ja = jb + 1;
                         break;
@@ -222,7 +267,7 @@ namespace HapradUtils {
                         j++;
                         jr = j - 1;
                         d[i] = (ent[j] - arg[i]) / (ent[j] - ent[jr]);
-                        ient[i] = j - ja;
+                        ent[i] = j - ja;
                         kd = kd + ent[i] * m;
                         m = m * nent[i];
                         ja = jb + 1;
@@ -236,17 +281,17 @@ namespace HapradUtils {
             j = jb;
             j++;
             d[i] = (ent[j] - arg[i]) / (ent[j] - ent[jr]);
-            ient[i] = j - ja;
-            kd = kd + ient[i] * m;
+            ent[i] = j - ja;
+            kd = kd + ent[i] * m;
             m = m * nent[i];
             ja = jb + 1;
             i++;
         }
-        dfint = 0.;
+        dfint = 0;
         while (1) {
-            fac = 1.;
-            iadr = kd;
-            ifadr = 1.;
+            Double_t fac = 1.;
+            Int_t iadr = kd;
+            Double_t ifadr = 1.;
             //cambiado a 0 dado el indice de los arreglos en fortran
             i = 0;
             while (i <= narg) {
@@ -261,12 +306,12 @@ namespace HapradUtils {
                 }
                 i++;
             }
-            dfint = dfint + fac * table[adr];
-            il = narg;
+            dfint = dfint + fac * table[iadr];
+            Int_t il = narg;
 
             while (ncomb[il] == 0) {
                 il--;
-                if (il == 0) return;
+                if (il == 0) return dfint;
             }
 
             ncomb[il] = 0;
@@ -282,30 +327,29 @@ namespace HapradUtils {
                 continue;
             }
         }
+        return dfint;
 
     }
 
     void ExclusiveModel(Double_t q2m, Double_t wm, Double_t csthcm, Double_t st,
                         Double_t sl, Double_t stt, Double_t stl, Double_t stlp)
     {
-        Double_t nq = 18;
-        Double_t nw = 47;
-        Double_t nt = 61;
+        const Int_t nq = 18;
+        const Int_t nw = 47;
+        const Int_t nt = 61;
 
-        Double_t q2_pn[nq] = {0.0, 0.3, 0.6, 0.9, 1.2, 1.5, 1.8,
-                              2.1, 2.4, 2.7, 3.0, 3.3, 3.6, 3.9,
-                              4.2, 4.5, 4.8, 5.0
-                             };
+        Double_t q2_pn[nq] = {0.0, 0.3, 0.6, 0.9, 1.2, 1.5, 1.8, 2.1,
+                              2.4, 2.7, 3.0, 3.3, 3.6, 3.9, 4.2, 4.5,
+                              4.8, 5.0 };
 
-        Double_t w_pn[nw] = {1.08, 1.10, 1.12, 1.14, 1.16, 1.18,
-                             1.20, 1.22, 1.24, 1.26, 1.28, 1.30,
-                             1.32, 1.34, 1.36, 1.38, 1.40, 1.42,
-                             1.44, 1.46, 1.48, 1.50, 1.52, 1.54,
-                             1.56, 1.58, 1.60, 1.62, 1.64, 1.66,
-                             1.68, 1.70, 1.72, 1.74, 1.76, 1.78,
-                             1.80, 1.82, 1.84, 1.86, 1.88, 1.90,
-                             1.92, 1.94, 1.96, 1.98, 2.00
-                            };
+        Double_t w_pn[nw] = {1.08, 1.10, 1.12, 1.14, 1.16, 1.18, 1.20,
+                             1.22, 1.24, 1.26, 1.28, 1.30, 1.32, 1.34,
+                             1.36, 1.38, 1.40, 1.42, 1.44, 1.46, 1.48,
+                             1.50, 1.52, 1.54, 1.56, 1.58, 1.60, 1.62,
+                             1.64, 1.66, 1.68, 1.70, 1.72, 1.74, 1.76,
+                             1.78, 1.80, 1.82, 1.84, 1.86, 1.88, 1.90,
+                             1.92, 1.94, 1.96, 1.98, 2.00};
+
         Double_t th_cm_pn[nt] = {0., 3., 6., 9., 12., 15., 18., 21.,
                                  24., 27., 30., 33., 36., 39., 42.,
                                  45., 48., 51., 54., 57., 60., 63.,
@@ -317,12 +361,17 @@ namespace HapradUtils {
                                  162., 165., 168., 171., 174., 177.,
                                  180.
                                 };
+
         Int_t narg[3] = {nq, nw, nt};
         Double_t nc = 0;
         Double_t degrad = 57.29577952;
         Double_t a2 = 1.15;
+        Double_t a3;
         Double_t a30 = -1.23;
         Double_t a31 = 0.16;
+        Double_t q2cor;
+        Double_t wcor;
+        Double_t th_cm;
 // Init
         st = 0.0;
         sl = 0.0;
@@ -362,13 +411,14 @@ namespace HapradUtils {
         if (TMath::Abs(csthcm) > 1) return;
 
         Double_t rarg[nq + nw + nt];
-        Double_t ft_cs[N], fl_cs[N], ftt_cs[N], ftl_cs[N], ftlp_cs[N];
+        const Int_t N = 100000; //solo para prueba
+        double ft_cs[N], fl_cs[N],ftt_cs[N], ftl_cs[N], ftlp_cs[N];
 
         if (nc == 0) {
             Int_t i = 0;
             FILE *input = fopen("pi_n_maid.dat", "r");
 
-            while (fscanf(input, "%f   %f   %f   %f   %f", &ft_cs[i], &fl_cs[i], &ftt_cs[i], &ftl_cs, &ftlp_cs[i])) {
+            while (fscanf(input, "%lf   %lf   %lf   %lf   %lf\n", &ft_cs[i],&fl_cs[i], &ftt_cs[i], &ftl_cs, &ftlp_cs[i])) {
                 i++;
             }
             fclose(input);
@@ -385,10 +435,7 @@ namespace HapradUtils {
             nc++;
 
         }
-
-        arg[0] = q2;
-        arg[1] = w;
-        arg[2] = th_cm;
+        Double_t arg[3] = {q2,w,th_cm};
 
         st = dfint(3, arg, narg, rarg, ft_cs) * wcor * q2cor;
         sl = dfint(3, arg, narg, rarg, fl_cs) * wcor * q2cor;
