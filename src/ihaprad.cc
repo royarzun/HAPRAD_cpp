@@ -215,7 +215,6 @@ void bornin(Double_t& sibor)
     tm[2] = (vv10 * vv20 - Power(amhh, 2.) * Q2) / 2.;
     tm[3] = (S * vv20 + X * vv10 - zdif * S_x * Q2) / 2.;
 
-    Double_t aa = S_x * (zdif - 2. * amp * plh / sqrt_lq) / 2. / amp2;
     Double_t ssum = 0.;
     for (Int_t i = isf1, i <= isf2, i = i + isf3) {
         ssum = ssum + tm[i] * sfm0[i];
