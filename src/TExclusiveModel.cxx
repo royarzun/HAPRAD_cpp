@@ -1,8 +1,7 @@
 #include "THapradUtils.h"
 #include "TExclusiveModel.h"
-#include "haprad_constants.h"
-#include "Partons.h"
 #include <iostream>
+#include "TMath.h"
 
 void ExclusiveModel(Double_t q2m, Double_t wm, Double_t csthcm, Double_t st,
                     Double_t sl, Double_t stt, Double_t stl, Double_t stlp)
