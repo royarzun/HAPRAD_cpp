@@ -70,7 +70,7 @@ double TQQTPhi::DoEval(double phi) const
     ROOT::Math::GaussLegendreIntegrator ig;
 
     TRV2LN rv2ln(fRC, phi);
-    ig.SetFunction(rv2ln,false);
+    ig.SetFunction(rv2ln);
     ig.SetNumberPoints(100);
     ig.SetRelTolerance(fConfig->EpsTau());
 

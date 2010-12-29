@@ -7,13 +7,10 @@ namespace HapradUtils {
 
     Double_t fspen(const Double_t x);
     Double_t fspens(const Double_t x);
+    Double_t dfint(Int_t narg, double *arg, Int_t *nent, Double_t *ent, Double_t *table);
+    void ExclusiveModel(Double_t q2m, Double_t wm, Double_t csthcm, Double_t st,
+                        Double_t sl, Double_t stt, Double_t stl, Double_t stlp);
 
-    void SemiInclusiveModel(Double_t& tldq2, Double_t& aks,
-                                Double_t& tldy, Double_t& zh,
-                                Double_t& tldpt2, Double_t& tldpx2,
-                                Double_t& tldplh, Double_t& H1z,
-                                Double_t& H2z, Double_t& H3z,
-                                Double_t& H4z);
 }
 
 #endif

@@ -3,7 +3,7 @@
 #include "TKinematicalVariables.h"
 #include "TLorentzInvariants.h"
 #include "THadronKinematics.h"
-#include "THapradUtils.h"
+#include "TSemiInclusiveModel.h"
 #include "haprad_constants.h"
 
 #ifdef DEBUG

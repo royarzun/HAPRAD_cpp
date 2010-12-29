@@ -3,6 +3,7 @@
 res.dat
 test.dat
 slib
+src
 .obj
 .dict
 .dep

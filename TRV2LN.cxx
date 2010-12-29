@@ -73,7 +73,7 @@ double TRV2LN::DoEval(double tauln) const
     ROOT::Math::GaussLegendreIntegrator ig;
 
     TPODINL podinl(fRC, tau, mu, fH, theta);
-    ig.SetFunction(podinl,false);
+    ig.SetFunction(podinl);
     ig.SetNumberPoints(100);
     ig.SetRelTolerance(fConfig->EpsRR());
 
